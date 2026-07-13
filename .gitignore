@@ -1,0 +1,22 @@
+# Thu muc build
+build/
+build-*/
+
+# File ca nhan cua Qt Creator
+*.user
+*.user.*
+
+# File tam CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# File bien dich
+*.o
+*.obj
+*.exe
+
+# OS junk
+.DS_Store
+Thumbs.db
