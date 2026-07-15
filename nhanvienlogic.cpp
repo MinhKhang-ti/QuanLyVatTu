@@ -1,78 +1,149 @@
 #include "nhanvienlogic.h"
 #include <cstring>
 
-void khoiTaoDSNV(DS_NHANVIEN& ds) {
+using namespace std;
+
+// Khởi tạo danh sách nhân viên
+void khoiTaoDSNV(DS_NHANVIEN &ds) {
     ds.n = 0;
 }
 
-int timViTriNV(const DS_NHANVIEN& ds, const char* manv) {
+// Tìm kiếm vị trí nhân viên theo Mã NV
+int timViTriNV(const DS_NHANVIEN &ds, const char *manv) {
     for (int i = 0; i < ds.n; i++) {
-        if (strcmp(ds.nodes[i]->MANV, manv) == 0) return i;
+        if (strcmp(ds.nodes[i]->MANV, manv) == 0) {
+            return i;
+        }
     }
     return -1;
 }
 
-static int timViTriChen(const DS_NHANVIEN& ds, const char* ten) {
+// Tìm vị trí chèn để đảm bảo thứ tự tăng dần theo Tên -> Họ
+int timViTriChen(const DS_NHANVIEN &ds, const char *ten, const char *ho) {
     int i = 0;
-    while (i < ds.n && strcmp(ds.nodes[i]->TEN, ten) <= 0) i++;
+    while (i < ds.n) {
+        int cmpTen = strcmp(ds.nodes[i]->TEN, ten);
+        if (cmpTen > 0) {
+            break; 
+        } else if (cmpTen == 0) {
+            int cmpHo = strcmp(ds.nodes[i]->HO, ho);
+            if (cmpHo > 0) {
+                break;
+            }
+        }
+        i++;
+    }
     return i;
 }
 
-bool themNV(DS_NHANVIEN& ds, const char* manv, const char* ho, const char* ten,
-            const char* phai, std::string& loi) {
-    if (ds.n >= MAX_NV) { loi = "Đã đủ tối đa " + std::to_string(MAX_NV) + " nhân viên"; return false; }
-    if (strlen(ho) == 0 || strlen(ten) == 0) { loi = "Họ và tên không được rỗng"; return false; }
-    if (timViTriNV(ds, manv) != -1) { loi = "Mã nhân viên đã tồn tại"; return false; }
+// Thêm nhân viên mới
+bool themNV(DS_NHANVIEN &ds, const char *manv, const char *ho, const char *ten, const char *phai, string &loi) {
+    if (ds.n >= MAX_NV) {
+        loi = "Danh sách nhân viên đã đầy!";
+        return false;
+    }
+    if (strlen(ho) == 0 || strlen(ten) == 0) {
+        loi = "Họ/Tên không được rỗng!";
+        return false;
+    }
+    if (timViTriNV(ds, manv) != -1) {
+        loi = "Mã nhân viên đã tồn tại!";
+        return false;
+    }
 
     NHANVIEN* nv = new NHANVIEN();
-    strncpy(nv->MANV, manv, 10); nv->MANV[10] = '\0';
-    strncpy(nv->HO, ho, 30); nv->HO[30] = '\0';
-    strncpy(nv->TEN, ten, 20); nv->TEN[20] = '\0';
-    strncpy(nv->PHAI, phai, 3); nv->PHAI[3] = '\0';
+    strcpy(nv->MANV, manv);
+    strcpy(nv->HO, ho);
+    strcpy(nv->TEN, ten);
+    strcpy(nv->PHAI, phai);
     nv->dshd = nullptr;
 
-    int viTri = timViTriChen(ds, ten);
-    for (int i = ds.n; i > viTri; i--) ds.nodes[i] = ds.nodes[i - 1];
-    ds.nodes[viTri] = nv;
+    int vitri = timViTriChen(ds, ten, ho);
+    for (int i = ds.n; i > vitri; i--) {
+        ds.nodes[i] = ds.nodes[i - 1];
+    }
+    ds.nodes[vitri] = nv;
     ds.n++;
     return true;
 }
 
-bool suaNV(DS_NHANVIEN& ds, const char* manv, const char* hoMoi, const char* tenMoi,
-           const char* phaiMoi, std::string& loi) {
-    int viTri = timViTriNV(ds, manv);
-    if (viTri == -1) { loi = "Không tìm thấy nhân viên"; return false; }
-    if (strlen(hoMoi) == 0 || strlen(tenMoi) == 0) { loi = "Họ và tên không được rỗng"; return false; }
+// Hiệu chỉnh (Sửa) nhân viên
+bool suaNV(DS_NHANVIEN &ds, const char *manv, const char *hoMoi, const char *tenMoi, const char *phaiMoi, string &loi) {
+    int vitri = timViTriNV(ds, manv);
+    if (vitri == -1) {
+        loi = "Không tìm thấy nhân viên!";
+        return false;
+    }
+    if (strlen(hoMoi) == 0 || strlen(tenMoi) == 0) {
+        loi = "Họ/Tên không được rỗng!";
+        return false;
+    }
+    
+    NHANVIEN *nv = ds.nodes[vitri];
+    bool doiHoTen = (strcmp(nv->TEN, tenMoi) != 0 || strcmp(nv->HO, hoMoi) != 0);
 
-    NHANVIEN* nv = ds.nodes[viTri];
-    bool doiTen = (strcmp(nv->TEN, tenMoi) != 0);
-    strncpy(nv->HO, hoMoi, 30); nv->HO[30] = '\0';
-    strncpy(nv->PHAI, phaiMoi, 3); nv->PHAI[3] = '\0';
-
-    if (doiTen) {
-        for (int i = viTri; i < ds.n - 1; i++) ds.nodes[i] = ds.nodes[i + 1];
+    if (doiHoTen) {
+        // Rút ra khỏi mảng
+        for (int i = vitri; i < ds.n - 1; i++) {
+            ds.nodes[i] = ds.nodes[i + 1];
+        }
         ds.n--;
-        strncpy(nv->TEN, tenMoi, 20); nv->TEN[20] = '\0';
-        int viTriMoi = timViTriChen(ds, tenMoi);
-        for (int i = ds.n; i > viTriMoi; i--) ds.nodes[i] = ds.nodes[i - 1];
+
+        // Ghi thông tin mới
+        strcpy(nv->HO, hoMoi);
+        strcpy(nv->TEN, tenMoi);
+        strcpy(nv->PHAI, phaiMoi);
+
+        // Tìm vị trí chèn mới
+        int viTriMoi = timViTriChen(ds, tenMoi, hoMoi);
+        for (int i = ds.n; i > viTriMoi; i--) {
+            ds.nodes[i] = ds.nodes[i - 1];
+        }
         ds.nodes[viTriMoi] = nv;
         ds.n++;
     } else {
-        strncpy(nv->TEN, tenMoi, 20); nv->TEN[20] = '\0';
+        strcpy(nv->PHAI, phaiMoi);
     }
     return true;
 }
 
-bool xoaNV(DS_NHANVIEN& ds, const char* manv, std::string& loi) {
-    int viTri = timViTriNV(ds, manv);
-    if (viTri == -1) { loi = "Không tìm thấy nhân viên"; return false; }
-    delete ds.nodes[viTri];
-    for (int i = viTri; i < ds.n - 1; i++) ds.nodes[i] = ds.nodes[i + 1];
+// Xóa nhân viên (Chỉ xóa nếu nhân viên chưa lập hóa đơn nào)
+bool xoaNV(DS_NHANVIEN &ds, const char *manv, string &loi) {
+    int vitri = timViTriNV(ds, manv);
+    if (vitri == -1) {
+        loi = "Không tìm thấy nhân viên!";
+        return false;
+    }
+
+    // Kiểm tra nếu nhân viên đã có hóa đơn trong hệ thống
+    if (ds.nodes[vitri]->dshd != nullptr) {
+        loi = "Nhân viên này đã lập hóa đơn trong hệ thống, không được phép xóa!";
+        return false;
+    }
+
+    // Giải phóng bộ nhớ nhân viên
+    delete ds.nodes[vitri];
+
+    // Dồn mảng dồn con trỏ
+    for (int i = vitri; i < ds.n - 1; i++) {
+        ds.nodes[i] = ds.nodes[i + 1];
+    }
     ds.n--;
     return true;
 }
 
-void huyDSNV(DS_NHANVIEN& ds) {
-    for (int i = 0; i < ds.n; i++) delete ds.nodes[i];
+// Giải phóng bộ nhớ toàn bộ danh sách khi đóng ứng dụng
+void huyDSNV(DS_NHANVIEN &ds) {
+    for (int i = 0; i < ds.n; i++) {
+        nodeHD* current = ds.nodes[i]->dshd;
+        while (current != nullptr) {
+            nodeHD* temp = current;
+            current = current->next;
+            delete temp;
+        }
+        delete ds.nodes[i];
+    }
     ds.n = 0;
 }
+
+
