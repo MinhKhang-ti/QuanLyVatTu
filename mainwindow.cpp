@@ -14,8 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("Quan Ly Nhap Xuat Vat Tu");
-    resize(900, 600);
-
+    showFullScreen();
     khoiTaoDSNV(dsnv);
 
     // Gán con trỏ stack trỏ tới QStackedWidget kéo thả trong file .ui
@@ -41,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btnNhanVien, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(1); });
     connect(ui->btnHoaDon, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(2); });
     connect(ui->btnThongKe, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(3); });
+    connect(ui->btnThoat, &QPushButton::clicked, this, &MainWindow::close);
 }
 
 MainWindow::~MainWindow()

@@ -17,7 +17,7 @@ VatTuPage::VatTuPage(TreeVT &rootRef, QWidget *parent)
     ui->soLuongEdit->setValidator(new QIntValidator(0, 999999, this));
 
     // Cấu hình bảng hiển thị
-    ui->table->horizontalHeader()->setStretchLastSection(true);
+    ui->table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->table->setSelectionBehavior(QAbstractItemView::SelectRows);
 

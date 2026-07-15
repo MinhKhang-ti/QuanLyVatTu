@@ -13,6 +13,11 @@
   <property name="windowTitle">
    <string>Quan Ly Nhap Xuat Vat Tu</string>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>11</pointsize>
+   </font>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="mainLayout">
     <item>
@@ -76,6 +81,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnThoat">
+         <property name="text">
+          <string>Thoát</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
