@@ -8,8 +8,6 @@
 
 #include <QStackedWidget>
 #include <QPushButton>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -20,43 +18,29 @@ MainWindow::MainWindow(QWidget *parent)
 
     khoiTaoDSNV(dsnv);
 
-    QWidget *central = ui->centralwidget;
-    QHBoxLayout *mainLayout = new QHBoxLayout(central);
+    // Gán con trỏ stack trỏ tới QStackedWidget kéo thả trong file .ui
+    stack = ui->stack;
 
-    QVBoxLayout *sidebar = new QVBoxLayout;
-    QPushButton *btnVatTu = new QPushButton("Vat tu");
-    QPushButton *btnNhanVien = new QPushButton("Nhan vien");
-    QPushButton *btnHoaDon = new QPushButton("Lap hoa don");
-    QPushButton *btnThongKe = new QPushButton("Thong ke");
+    // Khởi tạo các trang con
+    vatTuPage = new VatTuPage(dsvt, this);
+    nhanVienPage = new NhanVienPage(dsnv, this);
+    hoaDonPage = new HoaDonPage(dsvt, dsnv, this);
+    thongKePage = new ThongKePage(dsvt, dsnv, this);
 
-    sidebar->addWidget(btnVatTu);
-    sidebar->addWidget(btnNhanVien);
-    sidebar->addWidget(btnHoaDon);
-    sidebar->addWidget(btnThongKe);
-    sidebar->addStretch();
+    // Thêm các trang vào stack
+    stack->addWidget(vatTuPage);     // Chỉ mục 0
+    stack->addWidget(nhanVienPage);  // Chỉ mục 1
+    stack->addWidget(hoaDonPage);    // Chỉ mục 2
+    stack->addWidget(thongKePage);   // Chỉ mục 3
 
-    QWidget *sidebarWidget = new QWidget;
-    sidebarWidget->setLayout(sidebar);
-    sidebarWidget->setFixedWidth(180);
+    // Thiết lập trang mặc định hiển thị ban đầu
+    stack->setCurrentIndex(0);
 
-    stack = new QStackedWidget;
-    vatTuPage = new VatTuPage(dsvt);
-    nhanVienPage = new NhanVienPage(dsnv);
-    hoaDonPage = new HoaDonPage(dsvt, dsnv);
-    thongKePage = new ThongKePage(dsvt, dsnv);
-
-    stack->addWidget(vatTuPage);     // 0
-    stack->addWidget(nhanVienPage);  // 1
-    stack->addWidget(hoaDonPage);    // 2
-    stack->addWidget(thongKePage);   // 3
-
-    mainLayout->addWidget(sidebarWidget);
-    mainLayout->addWidget(stack);
-
-    connect(btnVatTu, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(0); });
-    connect(btnNhanVien, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(1); });
-    connect(btnHoaDon, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(2); });
-    connect(btnThongKe, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(3); });
+    // Kết nối các sự kiện nút bấm trên sidebar để chuyển trang
+    connect(ui->btnVatTu, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(0); });
+    connect(ui->btnNhanVien, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(1); });
+    connect(ui->btnHoaDon, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(2); });
+    connect(ui->btnThongKe, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(3); });
 }
 
 MainWindow::~MainWindow()
