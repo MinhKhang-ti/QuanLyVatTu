@@ -4,16 +4,16 @@
 #include <QWidget>
 #include "cautrucdulieu.h"
 
-class QLineEdit;
-class QLabel;
-class QPushButton;
-class QTableWidget;
+namespace Ui {
+class VatTuPage;
+}
 
 class VatTuPage : public QWidget
 {
     Q_OBJECT
 public:
     explicit VatTuPage(TreeVT &rootRef, QWidget *parent = nullptr);
+    ~VatTuPage();
 
 private slots:
     void validateForm();
@@ -21,16 +21,8 @@ private slots:
     void onXoaClicked();
 
 private:
+    Ui::VatTuPage *ui;
     TreeVT &root; // tham chieu toi cay dung chung, khong so huu rieng nua
-
-    QLineEdit *maVTEdit;
-    QLineEdit *tenVTEdit;
-    QLineEdit *dvtEdit;
-    QLineEdit *soLuongEdit;
-    QLabel *errorLabel;
-    QPushButton *themButton;
-    QPushButton *xoaButton;
-    QTableWidget *table;
 
     void lamMoiBang();
 };

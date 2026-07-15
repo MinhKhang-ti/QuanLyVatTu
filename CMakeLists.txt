@@ -14,12 +14,12 @@ qt_add_executable(QLVT
     cautrucdulieu.h
     vattulogic.h vattulogic.cpp
     nhanvienlogic.h nhanvienlogic.cpp
-    vattupage.h vattupage.cpp
-    nhanvienpage.h nhanvienpage.cpp
+    vattupage.h vattupage.cpp vattupage.ui
+    nhanvienpage.h nhanvienpage.cpp nhanvienpage.ui
     hoadonlogic.h hoadonlogic.cpp
     thongkelogic.h thongkelogic.cpp
-    hoadonpage.h hoadonpage.cpp
-    thongkepage.h thongkepage.cpp
+    hoadonpage.h hoadonpage.cpp hoadonpage.ui
+    thongkepage.h thongkepage.cpp thongkepage.ui
     fileio.h fileio.cpp
     data/vattu.dat
     data/nhanvien.dat

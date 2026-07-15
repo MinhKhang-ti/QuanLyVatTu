@@ -1,12 +1,13 @@
 #include "thongkepage.h"
-#include <QVBoxLayout>
-#include <QLabel>
+#include "ui_thongkepage.h"
 
 ThongKePage::ThongKePage(TreeVT &rootRef, DS_NHANVIEN &dsRef, QWidget *parent)
-    : QWidget(parent), root(rootRef), dsnv(dsRef)
+    : QWidget(parent), ui(new Ui::ThongKePage), root(rootRef), dsnv(dsRef)
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    QLabel *label = new QLabel("Chức năng thống kê");
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
+    ui->setupUi(this);
+}
+
+ThongKePage::~ThongKePage()
+{
+    delete ui;
 }

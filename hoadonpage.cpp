@@ -1,12 +1,13 @@
 #include "hoadonpage.h"
-#include <QVBoxLayout>
-#include <QLabel>
+#include "ui_hoadonpage.h"
 
 HoaDonPage::HoaDonPage(TreeVT &rootRef, DS_NHANVIEN &dsRef, QWidget *parent)
-    : QWidget(parent), root(rootRef), dsnv(dsRef)
+    : QWidget(parent), ui(new Ui::HoaDonPage), root(rootRef), dsnv(dsRef)
 {
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    QLabel *label = new QLabel("Chức năng lập hóa đơn");
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
+    ui->setupUi(this);
+}
+
+HoaDonPage::~HoaDonPage()
+{
+    delete ui;
 }

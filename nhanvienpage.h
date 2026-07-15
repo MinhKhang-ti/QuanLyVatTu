@@ -4,17 +4,16 @@
 #include <QWidget>
 #include "cautrucdulieu.h"
 
-class QLineEdit;
-class QComboBox;
-class QLabel;
-class QPushButton;
-class QTableWidget;
+namespace Ui {
+class NhanVienPage;
+}
 
 class NhanVienPage : public QWidget
 {
     Q_OBJECT
 public:
     explicit NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent = nullptr);
+    ~NhanVienPage();
 
 private slots:
     void validateForm();
@@ -22,16 +21,8 @@ private slots:
     void onXoaClicked();
 
 private:
+    Ui::NhanVienPage *ui;
     DS_NHANVIEN &dsnv; // tham chieu toi mang dung chung
-
-    QLineEdit *manvEdit;
-    QLineEdit *hoEdit;
-    QLineEdit *tenEdit;
-    QComboBox *phaiCombo;
-    QLabel *errorLabel;
-    QPushButton *themButton;
-    QPushButton *xoaButton;
-    QTableWidget *table;
 
     void lamMoiBang();
 };
