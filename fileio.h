@@ -4,9 +4,9 @@
 #include "cautrucdulieu.h"
 #include <string>
 
-// Duong dan file mac dinh (thu muc data/ nam cung cap voi thu muc chay .exe)
-const std::string FILE_VATTU = "data/vattu.dat";
-const std::string FILE_NHANVIEN = "data/nhanvien.dat";
+// Duong dan file mac dinh
+const std::string FILE_VATTU = "../../data/vattu.txt";
+const std::string FILE_NHANVIEN = "../../data/nhanvien.txt";
 
 // Luu toan bo cay vat tu ra file
 void luuVatTu(TreeVT root, const std::string& duongDan);

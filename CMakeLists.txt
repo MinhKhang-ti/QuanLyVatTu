@@ -21,8 +21,8 @@ qt_add_executable(QLVT
     hoadonpage.h hoadonpage.cpp hoadonpage.ui
     thongkepage.h thongkepage.cpp thongkepage.ui
     fileio.h fileio.cpp
-    data/vattu.dat
-    data/nhanvien.dat
+    data/vattu.txt
+    data/nhanvien.txt
     .gitignore
 )
 

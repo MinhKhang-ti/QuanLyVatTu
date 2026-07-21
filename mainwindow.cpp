@@ -5,6 +5,8 @@
 #include "hoadonpage.h"
 #include "thongkepage.h"
 #include "nhanvienlogic.h"
+#include "vattulogic.h"
+#include "fileio.h"
 
 #include <QStackedWidget>
 #include <QPushButton>
@@ -16,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Quan Ly Nhap Xuat Vat Tu");
     showFullScreen();
     khoiTaoDSNV(dsnv);
+
+    // Nap du lieu tu file khi khoi dong
+    docVatTu(dsvt, FILE_VATTU);
+    docNhanVien(dsnv, FILE_NHANVIEN);
 
     // Gán con trỏ stack trỏ tới QStackedWidget kéo thả trong file .ui
     stack = ui->stack;
@@ -45,5 +51,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    // Luu lai toan bo du lieu truoc khi thoat
+    luuVatTu(dsvt, FILE_VATTU);
+    luuNhanVien(dsnv, FILE_NHANVIEN);
+
+    // Giai phong bo nho dong cua cay va danh sach con tro nhan vien
+    huyCayVT(dsvt);
+    huyDSNV(dsnv);
+
     delete ui;
 }

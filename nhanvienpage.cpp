@@ -1,6 +1,7 @@
 #include "nhanvienpage.h"
 #include "ui_nhanvienpage.h"
 #include "nhanvienlogic.h"
+#include "fileio.h"
 
 #include <QRegularExpressionValidator>
 #include <QHeaderView>
@@ -111,6 +112,7 @@ void NhanVienPage::onThemClicked() {
     ui->hoEdit->clear();
     ui->tenEdit->clear();
     lamMoiBang();
+    luuNhanVien(dsnv, FILE_NHANVIEN);
 }
 
 void NhanVienPage::onSuaClicked() {
@@ -148,6 +150,7 @@ void NhanVienPage::onSuaClicked() {
 
     onHuyClicked(); // Giải phóng form và bật lại ô nhập mã nhân viên
     lamMoiBang();
+    luuNhanVien(dsnv, FILE_NHANVIEN);
 }
 
 void NhanVienPage::onXoaClicked() {
@@ -184,6 +187,7 @@ void NhanVienPage::onXoaClicked() {
     
     onHuyClicked();
     lamMoiBang();
+    luuNhanVien(dsnv, FILE_NHANVIEN);
 }
 
 void NhanVienPage::onHuyClicked() {
@@ -276,6 +280,7 @@ void NhanVienPage::onUndoClicked() {
     lamMoiBang();
     onHuyClicked();
     updateUndoRedoButtons();
+    luuNhanVien(dsnv, FILE_NHANVIEN);
 }
 
 void NhanVienPage::onRedoClicked() {
@@ -296,7 +301,6 @@ void NhanVienPage::onRedoClicked() {
             }
         }
     }
-
     // Tiến hành lấy trạng thái ra khỏi ngăn xếp
     nextState = popState(redoStackTop);
 
@@ -326,6 +330,7 @@ void NhanVienPage::onRedoClicked() {
     lamMoiBang();
     onHuyClicked();
     updateUndoRedoButtons();
+    luuNhanVien(dsnv, FILE_NHANVIEN);
 }
 
 void NhanVienPage::saveState() {

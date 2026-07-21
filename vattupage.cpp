@@ -1,10 +1,12 @@
 #include "vattupage.h"
 #include "ui_vattupage.h"
 #include "vattulogic.h"
+#include "fileio.h"
 
 #include <QIntValidator>
 #include <QRegularExpressionValidator>
 #include <QHeaderView>
+#include <QMessageBox>
 
 VatTuPage::VatTuPage(TreeVT &rootRef, QWidget *parent) 
     : QWidget(parent), ui(new Ui::VatTuPage), root(rootRef) 
@@ -74,6 +76,7 @@ void VatTuPage::onThemClicked() {
     ui->dvtEdit->clear();
     ui->soLuongEdit->clear();
     lamMoiBang();
+    luuVatTu(root, FILE_VATTU);
 }
 
 void VatTuPage::onXoaClicked() {
@@ -81,8 +84,13 @@ void VatTuPage::onXoaClicked() {
     if (row < 0) return;
     QString mavt = ui->table->item(row, 0)->text();
     std::string loi;
-    xoaVT(root, mavt.toStdString().c_str(), loi);
-    lamMoiBang();
+    bool ok = xoaVT(root, mavt.toStdString().c_str(), loi);
+    if (!ok) {
+        QMessageBox::critical(this, "Lỗi xóa vật tư", QString::fromStdString(loi));
+    } else {
+        lamMoiBang();
+        luuVatTu(root, FILE_VATTU);
+    }
 }
 
 void VatTuPage::lamMoiBang() {
