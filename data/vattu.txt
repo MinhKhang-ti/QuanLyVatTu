@@ -1,1 +1,20 @@
-CC|N|N|19
+N24|bàn học|cái|15
+N25|ghế nhựa|cái|40
+N26|quạt điện|cái|8
+N27|máy in|cái|3
+N28|máy chiếu|cái|2
+N29|bảng trắng|cái|5
+N30|bút lông|cây|120
+N31|giấy A4|ram|50
+N32|kệ sách|cái|6
+N33|đèn LED|cái|25
+N34|máy tính để bàn|bộ|12
+N35|laptop|cái|10
+N36|ổ cắm điện|cái|18
+N37|dây mạng|mét|200
+N38|chuột máy tính|cái|30
+N39|bàn phím|cái|28
+N40|máy quét|cái|4
+N41|camera|cái|16
+N42|máy lạnh|cái|7
+N43|loa|cái|9
