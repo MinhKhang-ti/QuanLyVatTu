@@ -101,3 +101,12 @@ void huyCayVT(TreeVT& root) {
     delete root;
     root = nullptr;
 }
+
+nodeVT* cloneCayVT(nodeVT* root) {
+    if (!root) return nullptr;
+    nodeVT* newNode = new nodeVT();
+    newNode->vt = root->vt;
+    newNode->left = cloneCayVT(root->left);
+    newNode->right = cloneCayVT(root->right);
+    return newNode;
+}

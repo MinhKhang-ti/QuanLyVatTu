@@ -21,4 +21,7 @@ VATTU* duyetTheoTen(TreeVT root, int& soLuong);
 
 void huyCayVT(TreeVT& root);
 
+// Nhan ban sau toan bo cay (deep clone) - dung de luu trang thai cho Undo/Redo
+nodeVT* cloneCayVT(nodeVT* root);
+
 #endif // VATTULOGIC_H
