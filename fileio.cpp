@@ -132,6 +132,7 @@ void docNhanVien(DS_NHANVIEN& ds, const string& duongDan) {
                 strncpy(nv->HO, ho.c_str(), 30); nv->HO[30] = '\0';
                 strncpy(nv->TEN, ten.c_str(), 20); nv->TEN[20] = '\0';
                 strncpy(nv->PHAI, phai.c_str(), 3); nv->PHAI[3] = '\0';
+                nv->CoHD = false;
                 nv->dshd = nullptr;
 
                 ds.nodes[ds.n++] = nv;
@@ -141,6 +142,7 @@ void docNhanVien(DS_NHANVIEN& ds, const string& duongDan) {
         } 
         else if (type == "HD") {
             if (currentNV == nullptr) continue;
+            currentNV->CoHD = true;
             string soHD, ngayStr, thangStr, namStr, loaiStr;
             if (getline(ss, soHD, '|') &&
                 getline(ss, ngayStr, '|') &&

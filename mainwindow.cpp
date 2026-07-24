@@ -44,7 +44,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Kết nối các sự kiện nút bấm trên sidebar để chuyển trang
     connect(ui->btnVatTu, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(0); });
     connect(ui->btnNhanVien, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(1); });
-    connect(ui->btnHoaDon, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(2); });
+    connect(ui->btnHoaDon, &QPushButton::clicked, this, [=]() { 
+        static_cast<HoaDonPage*>(hoaDonPage)->napDuLieuCombo(); 
+        stack->setCurrentIndex(2); 
+    });
     connect(ui->btnThongKe, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(3); });
     connect(ui->btnThoat, &QPushButton::clicked, this, &MainWindow::close);
 }

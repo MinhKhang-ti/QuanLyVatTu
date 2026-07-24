@@ -242,7 +242,7 @@ void NhanVienPage::onUndoClicked() {
     for (int i = 0; i < dsnv.n; i++) {
         int idx = timViTriNV(*previousState, dsnv.nodes[i]->MANV);
         if (idx == -1) { // Nhân viên này sẽ bị xóa nếu ta thực hiện Undo
-            if (dsnv.nodes[i]->dshd != nullptr) {
+            if (dsnv.nodes[i]->CoHD || dsnv.nodes[i]->dshd != nullptr) {
                 QMessageBox::warning(this, "Không thể Undo", 
                     QString("Không thể quay lại thao tác vì nhân viên %1 (Mã: %2) đã lập hóa đơn trong hệ thống!")
                     .arg(dsnv.nodes[i]->TEN).arg(dsnv.nodes[i]->MANV));
@@ -293,7 +293,7 @@ void NhanVienPage::onRedoClicked() {
     for (int i = 0; i < dsnv.n; i++) {
         int idx = timViTriNV(*nextState, dsnv.nodes[i]->MANV);
         if (idx == -1) { // Nhân viên này sẽ bị xóa nếu ta thực hiện Redo
-            if (dsnv.nodes[i]->dshd != nullptr) {
+            if (dsnv.nodes[i]->CoHD || dsnv.nodes[i]->dshd != nullptr) {
                 QMessageBox::warning(this, "Không thể Redo", 
                     QString("Không thể làm lại thao tác vì nhân viên %1 (Mã: %2) đã lập hóa đơn trong hệ thống!")
                     .arg(dsnv.nodes[i]->TEN).arg(dsnv.nodes[i]->MANV));
@@ -382,6 +382,7 @@ DS_NHANVIEN* NhanVienPage::cloneState(const DS_NHANVIEN &source) {
         strcpy(nv->HO, source.nodes[i]->HO);
         strcpy(nv->TEN, source.nodes[i]->TEN);
         strcpy(nv->PHAI, source.nodes[i]->PHAI);
+        nv->CoHD = source.nodes[i]->CoHD;
 
         // Lưu trữ nông con trỏ hóa đơn hiện hành, không sao chép sâu để bảo toàn lịch sử hóa đơn
         nv->dshd = source.nodes[i]->dshd;

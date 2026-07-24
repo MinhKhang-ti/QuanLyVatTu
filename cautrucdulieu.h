@@ -64,6 +64,7 @@ struct NHANVIEN {
     char HO[31];
     char TEN[21];
     char PHAI[4];
+    bool CoHD;
     PTRHD dshd = NULL;
 };
 

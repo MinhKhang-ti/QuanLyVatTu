@@ -56,6 +56,7 @@ bool themNV(DS_NHANVIEN &ds, const char *manv, const char *ho, const char *ten, 
     strcpy(nv->HO, ho);
     strcpy(nv->TEN, ten);
     strcpy(nv->PHAI, phai);
+    nv->CoHD = false;
     nv->dshd = nullptr;
 
     int vitri = timViTriChen(ds, ten, ho);
@@ -116,7 +117,7 @@ bool xoaNV(DS_NHANVIEN &ds, const char *manv, string &loi) {
     }
 
     // Kiểm tra nếu nhân viên đã có hóa đơn trong hệ thống
-    if (ds.nodes[vitri]->dshd != nullptr) {
+    if (ds.nodes[vitri]->CoHD || ds.nodes[vitri]->dshd != nullptr) {
         loi = "Nhân viên này đã lập hóa đơn trong hệ thống, không được phép xóa!";
         return false;
     }

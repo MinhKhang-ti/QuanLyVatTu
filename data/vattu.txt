@@ -1,4 +1,4 @@
-N24|bàn học|cái|15
+N24|bàn học|cái|70
 N25|ghế nhựa|cái|40
 N26|quạt điện|cái|8
 N27|máy in|cái|3
