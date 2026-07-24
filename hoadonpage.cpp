@@ -88,6 +88,19 @@ void HoaDonPage::napVTCombo() {
 void HoaDonPage::onThemCTClicked() {
     ui->errorLabel->setVisible(false);
 
+    QString soHD = ui->soHDEdit->text().trimmed().toUpper();
+    if (soHD.isEmpty()) {
+        ui->errorLabel->setText("Vui lòng nhập Số hóa đơn trước khi thêm vật tư!");
+        ui->errorLabel->setVisible(true);
+        return;
+    }
+
+    if (ui->nvCombo->currentIndex() < 0) {
+        ui->errorLabel->setText("Vui lòng chọn Nhân viên lập hóa đơn!");
+        ui->errorLabel->setVisible(true);
+        return;
+    }
+
     if (ui->vtCombo->currentIndex() < 0) {
         ui->errorLabel->setText("Vui lòng chọn vật tư!");
         ui->errorLabel->setVisible(true);
@@ -264,6 +277,11 @@ void HoaDonPage::onHuyClicked() {
 
 void HoaDonPage::resetForm() {
     ui->soHDEdit->clear();
+    ui->soHDEdit->setEnabled(true);
+    ui->nvCombo->setEnabled(true);
+    ui->ngayLapEdit->setEnabled(true);
+    ui->loaiCombo->setEnabled(true);
+
     ui->soLuongEdit->clear();
     ui->donGiaEdit->clear();
     ui->vatEdit->setText("5");
@@ -276,6 +294,13 @@ void HoaDonPage::resetForm() {
 }
 
 void HoaDonPage::capNhatBangCTHD() {
+    // Nếu hóa đơn đã có ít nhất 1 vật tư đang lập -> Khóa các ô header không cho sửa
+    bool dangLap = (cthdTam.n > 0);
+    ui->soHDEdit->setEnabled(!dangLap);
+    ui->nvCombo->setEnabled(!dangLap);
+    ui->ngayLapEdit->setEnabled(!dangLap);
+    ui->loaiCombo->setEnabled(!dangLap);
+
     ui->tableCTHD->setRowCount(cthdTam.n);
     double tongTienHD = 0;
 

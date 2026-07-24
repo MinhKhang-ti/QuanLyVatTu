@@ -1,9 +1,9 @@
-N24|bàn học|cái|70
+N24|bàn học|cái|75
 N25|ghế nhựa|cái|40
 N26|quạt điện|cái|8
 N27|máy in|cái|3
 N28|máy chiếu|cái|2
-N29|bảng trắng|cái|5
+N29|bảng trắng|cái|10
 N30|bút lông|cây|120
 N31|giấy A4|ram|50
 N32|kệ sách|cái|6
