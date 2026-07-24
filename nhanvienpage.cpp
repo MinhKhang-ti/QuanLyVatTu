@@ -402,8 +402,7 @@ void NhanVienPage::freeState(DS_NHANVIEN* state) {
 void NhanVienPage::lamMoiBang() {
     QString keyword = ui->timKiemEdit->text().trimmed().toUpper();
 
-    // Lọc các bản ghi khớp với từ khóa tìm kiếm
-    std::vector<int> matchingIndices;
+    int soKhop = 0;
     for (int i = 0; i < dsnv.n; i++) {
         QString manv = QString::fromUtf8(dsnv.nodes[i]->MANV).toUpper();
         QString ho = QString::fromUtf8(dsnv.nodes[i]->HO).toUpper();
@@ -414,16 +413,27 @@ void NhanVienPage::lamMoiBang() {
             ho.contains(keyword) || 
             ten.contains(keyword)) 
         {
-            matchingIndices.push_back(i);
+            soKhop++;
         }
     }
 
-    ui->table->setRowCount(matchingIndices.size());
-    for (size_t i = 0; i < matchingIndices.size(); i++) {
-        int origIndex = matchingIndices[i];
-        ui->table->setItem(i, 0, new QTableWidgetItem(dsnv.nodes[origIndex]->MANV));
-        ui->table->setItem(i, 1, new QTableWidgetItem(dsnv.nodes[origIndex]->HO));
-        ui->table->setItem(i, 2, new QTableWidgetItem(dsnv.nodes[origIndex]->TEN));
-        ui->table->setItem(i, 3, new QTableWidgetItem(dsnv.nodes[origIndex]->PHAI));
+    ui->table->setRowCount(soKhop);
+    int row = 0;
+    for (int i = 0; i < dsnv.n; i++) {
+        QString manv = QString::fromUtf8(dsnv.nodes[i]->MANV).toUpper();
+        QString ho = QString::fromUtf8(dsnv.nodes[i]->HO).toUpper();
+        QString ten = QString::fromUtf8(dsnv.nodes[i]->TEN).toUpper();
+
+        if (keyword.isEmpty() || 
+            manv.contains(keyword) || 
+            ho.contains(keyword) || 
+            ten.contains(keyword)) 
+        {
+            ui->table->setItem(row, 0, new QTableWidgetItem(dsnv.nodes[i]->MANV));
+            ui->table->setItem(row, 1, new QTableWidgetItem(dsnv.nodes[i]->HO));
+            ui->table->setItem(row, 2, new QTableWidgetItem(dsnv.nodes[i]->TEN));
+            ui->table->setItem(row, 3, new QTableWidgetItem(dsnv.nodes[i]->PHAI));
+            row++;
+        }
     }
 }
