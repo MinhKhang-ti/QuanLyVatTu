@@ -74,22 +74,21 @@ int demSoVT(TreeVT root) {
     return 1 + demSoVT(root->left) + demSoVT(root->right);
 }
 
-static void duyetInorderVaoMang(nodeVT* root, VATTU mang[], int& idx) {
+static void duyetInorderLayDiaChi(nodeVT* root, nodeVT* mang[], int& idx) {
     if (!root) return;
-    duyetInorderVaoMang(root->left, mang, idx);
-    mang[idx] = root->vt;
+    duyetInorderLayDiaChi(root->left, mang, idx);
+    mang[idx] = root;
     idx++;
-    duyetInorderVaoMang(root->right, mang, idx);
+    duyetInorderLayDiaChi(root->right, mang, idx);
 }
 
-VATTU* duyetTheoTen(TreeVT root, int& soLuong) {
+nodeVT** duyetTheoTen(TreeVT root, int& soLuong) {
     soLuong = demSoVT(root);
-    VATTU* mang = new VATTU[soLuong];
+    nodeVT** mang = new nodeVT*[soLuong];
     int idx = 0;
-    duyetInorderVaoMang(root, mang, idx);
-
-    std::sort(mang, mang + soLuong, [](const VATTU& a, const VATTU& b) {
-        return strcmp(a.TENVT, b.TENVT) < 0;
+    duyetInorderLayDiaChi(root, mang, idx);
+    std::sort(mang, mang + soLuong, [](nodeVT* a, nodeVT* b) {
+        return strcmp(a->vt.TENVT, b->vt.TENVT) < 0;
     });
     return mang;
 }
@@ -100,13 +99,4 @@ void huyCayVT(TreeVT& root) {
     huyCayVT(root->right);
     delete root;
     root = nullptr;
-}
-
-nodeVT* cloneCayVT(nodeVT* root) {
-    if (!root) return nullptr;
-    nodeVT* newNode = new nodeVT();
-    newNode->vt = root->vt;
-    newNode->left = cloneCayVT(root->left);
-    newNode->right = cloneCayVT(root->right);
-    return newNode;
 }

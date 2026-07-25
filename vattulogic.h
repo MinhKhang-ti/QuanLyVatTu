@@ -15,13 +15,8 @@ bool xoaVT(TreeVT& root, const char* mavt, std::string& loi);
 // Dem so vat tu hien co trong cay
 int demSoVT(TreeVT root);
 
-// Cap phat mang dong (new[]), duyet inorder roi sap xep theo TENVT tang dan.
-// Ghi so luong phan tu vao "soLuong". NGUOI GOI PHAI tu delete[] mang sau khi dung xong.
-VATTU* duyetTheoTen(TreeVT root, int& soLuong);
+nodeVT** duyetTheoTen(TreeVT root, int& soLuong);
 
 void huyCayVT(TreeVT& root);
-
-// Nhan ban sau toan bo cay (deep clone) - dung de luu trang thai cho Undo/Redo
-nodeVT* cloneCayVT(nodeVT* root);
 
 #endif // VATTULOGIC_H

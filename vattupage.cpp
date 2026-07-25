@@ -2,11 +2,11 @@
 #include "ui_vattupage.h"
 #include "vattulogic.h"
 #include "fileio.h"
-#include <QIntValidator>
 #include <QRegularExpressionValidator>
 #include <QHeaderView>
 #include <QSignalBlocker>
 #include <QMessageBox>
+#include <cstring>
 
 VatTuPage::VatTuPage(TreeVT &rootRef, QWidget *parent)
     : QWidget(parent), ui(new Ui::VatTuPage), root(rootRef)
@@ -72,23 +72,31 @@ void VatTuPage::validateForm() {
 }
 
 void VatTuPage::onThemClicked() {
-    saveState();
+    HistoryEntryVT entry{};
+    entry.loai = THEM;
+
+    QString mavt = ui->maVTEdit->text().toUpper();
+    QString tenvt = ui->tenVTEdit->text();
+    QString dvt = ui->dvtEdit->text();
+    int soLuong = ui->soLuongEdit->text().toInt();
+
+    strncpy(entry.sau.MAVT, mavt.toStdString().c_str(), 10); entry.sau.MAVT[10] = '\0';
+    strncpy(entry.sau.TENVT, tenvt.toStdString().c_str(), 50); entry.sau.TENVT[50] = '\0';
+    strncpy(entry.sau.DVT, dvt.toStdString().c_str(), 10); entry.sau.DVT[10] = '\0';
+    entry.sau.SoLuongTon = soLuong;
 
     std::string loi;
-    bool ok = themVT(root,
-                     ui->maVTEdit->text().toUpper().toStdString().c_str(),
-                     ui->tenVTEdit->text().toStdString().c_str(),
-                     ui->dvtEdit->text().toStdString().c_str(),
-                     ui->soLuongEdit->text().toInt(),
-                     loi);
+    bool ok = themVT(root, entry.sau.MAVT, entry.sau.TENVT, entry.sau.DVT, entry.sau.SoLuongTon, loi);
     if (!ok) {
-        TreeVT bo = popState(undoStackTop);
-        huyCayVT(bo);
-        updateUndoRedoButtons();
         ui->errorLabel->setText(QString::fromStdString(loi));
         ui->errorLabel->setVisible(true);
         return;
     }
+
+    pushEntry(undoStackTop, entry);
+    clearStack(redoStackTop);
+    updateUndoRedoButtons();
+
     resetForm();
     luuVatTu(root, FILE_VATTU);
     lamMoiBang();
@@ -109,17 +117,30 @@ void VatTuPage::onXoaClicked() {
         QMessageBox::Yes | QMessageBox::No);
     if (reply != QMessageBox::Yes) return;
 
-    saveState();
+    HistoryEntryVT entry{};
+    entry.loai = XOA;
+
+    // Doc thang tu bang - bang dang hien dung du lieu hien tai cua node nay
+    // (da co san tu buoc lamMoiBang() truoc do), khong can goi timVT() them lan nua
+    QString dvt = ui->table->item(row, 2)->text();
+    int soLuong = ui->table->item(row, 3)->text().toInt();
+
+    strncpy(entry.truoc.MAVT, mavt.toStdString().c_str(), 10); entry.truoc.MAVT[10] = '\0';
+    strncpy(entry.truoc.TENVT, tenvt.toStdString().c_str(), 50); entry.truoc.TENVT[50] = '\0';
+    strncpy(entry.truoc.DVT, dvt.toStdString().c_str(), 10); entry.truoc.DVT[10] = '\0';
+    entry.truoc.SoLuongTon = soLuong;
 
     std::string loi;
     bool ok = xoaVT(root, mavt.toStdString().c_str(), loi);
     if (!ok) {
-        TreeVT bo = popState(undoStackTop);
-        huyCayVT(bo);
-        updateUndoRedoButtons();
         QMessageBox::critical(this, "Lỗi xóa vật tư", QString::fromStdString(loi));
         return;
     }
+
+    pushEntry(undoStackTop, entry);
+    clearStack(redoStackTop);
+    updateUndoRedoButtons();
+
     resetForm();
     luuVatTu(root, FILE_VATTU);
     lamMoiBang();
@@ -134,22 +155,32 @@ void VatTuPage::onSuaClicked() {
         QMessageBox::Yes | QMessageBox::No);
     if (reply != QMessageBox::Yes) return;
 
-    saveState();
+    HistoryEntryVT entry{};
+    entry.loai = SUA;
+
+    // Dung snapshot da luu tu luc chon dong - KHONG can goi timVT() de hoi lai cay
+    strncpy(entry.truoc.MAVT, maVTDangSua.toStdString().c_str(), 10); entry.truoc.MAVT[10] = '\0';
+    strncpy(entry.truoc.TENVT, tenVTGoc.toStdString().c_str(), 50); entry.truoc.TENVT[50] = '\0';
+    strncpy(entry.truoc.DVT, dvtGoc.toStdString().c_str(), 10); entry.truoc.DVT[10] = '\0';
+    entry.truoc.SoLuongTon = soLuongGoc;
+
+    entry.sau = entry.truoc; // sao chep, roi cap nhat 2 field se doi
+    QString tenMoi = ui->tenVTEdit->text();
+    QString dvtMoi = ui->dvtEdit->text();
+    strncpy(entry.sau.TENVT, tenMoi.toStdString().c_str(), 50); entry.sau.TENVT[50] = '\0';
+    strncpy(entry.sau.DVT, dvtMoi.toStdString().c_str(), 10); entry.sau.DVT[10] = '\0';
 
     std::string loi;
-    bool ok = suaVT(root,
-                    maVTDangSua.toStdString().c_str(),
-                    ui->tenVTEdit->text().toStdString().c_str(),
-                    ui->dvtEdit->text().toStdString().c_str(),
-                    loi);
+    bool ok = suaVT(root, maVTDangSua.toStdString().c_str(), entry.sau.TENVT, entry.sau.DVT, loi);
     if (!ok) {
-        TreeVT bo = popState(undoStackTop);
-        huyCayVT(bo);
-        updateUndoRedoButtons();
         ui->errorLabel->setText(QString::fromStdString(loi));
         ui->errorLabel->setVisible(true);
         return;
     }
+
+    pushEntry(undoStackTop, entry);
+    clearStack(redoStackTop);
+    updateUndoRedoButtons();
 
     resetForm();
     luuVatTu(root, FILE_VATTU);
@@ -175,6 +206,12 @@ void VatTuPage::onTableSelectionChanged() {
     ui->dvtEdit->setText(ui->table->item(row, 2)->text());
     ui->soLuongEdit->setText(ui->table->item(row, 3)->text());
 
+    // Luu lai snapshot du lieu GOC ngay tai thoi diem chon - tan dung du lieu
+    // da co san trong bang (tu buoc lamMoiBang() truoc do), khong can hoi lai cay
+    tenVTGoc = ui->table->item(row, 1)->text();
+    dvtGoc = ui->table->item(row, 2)->text();
+    soLuongGoc = ui->table->item(row, 3)->text().toInt();
+
     ui->maVTEdit->setReadOnly(true);
     ui->soLuongEdit->setReadOnly(true);
     ui->themButton->setEnabled(false);
@@ -184,14 +221,23 @@ void VatTuPage::onTableSelectionChanged() {
 
 void VatTuPage::onUndoClicked() {
     if (!undoStackTop) return;
+    HistoryEntryVT entry = popEntry(undoStackTop);
+    std::string loi;
 
-    TreeVT previous = popState(undoStackTop);
-    TreeVT hienTai = cloneCayVT(root);
-    pushState(redoStackTop, hienTai);
+    switch (entry.loai) {
+    case THEM:
+        xoaVT(root, entry.sau.MAVT, loi); // dao nguoc THEM = XOA lai
+        break;
+    case XOA:
+        themVT(root, entry.truoc.MAVT, entry.truoc.TENVT, entry.truoc.DVT,
+               entry.truoc.SoLuongTon, loi); // dao nguoc XOA = THEM LAI dung du lieu cu
+        break;
+    case SUA:
+        suaVT(root, entry.truoc.MAVT, entry.truoc.TENVT, entry.truoc.DVT, loi); // tra ve gia tri cu
+        break;
+    }
 
-    huyCayVT(root);
-    root = previous;
-
+    pushEntry(redoStackTop, entry);
     resetForm();
     lamMoiBang();
     updateUndoRedoButtons();
@@ -200,14 +246,23 @@ void VatTuPage::onUndoClicked() {
 
 void VatTuPage::onRedoClicked() {
     if (!redoStackTop) return;
+    HistoryEntryVT entry = popEntry(redoStackTop);
+    std::string loi;
 
-    TreeVT tiepTheo = popState(redoStackTop);
-    TreeVT hienTai = cloneCayVT(root);
-    pushState(undoStackTop, hienTai);
+    switch (entry.loai) {
+    case THEM:
+        themVT(root, entry.sau.MAVT, entry.sau.TENVT, entry.sau.DVT,
+               entry.sau.SoLuongTon, loi); // lam lai THEM
+        break;
+    case XOA:
+        xoaVT(root, entry.truoc.MAVT, loi); // lam lai XOA
+        break;
+    case SUA:
+        suaVT(root, entry.truoc.MAVT, entry.sau.TENVT, entry.sau.DVT, loi); // ap dung lai gia tri moi
+        break;
+    }
 
-    huyCayVT(root);
-    root = tiepTheo;
-
+    pushEntry(undoStackTop, entry);
     resetForm();
     lamMoiBang();
     updateUndoRedoButtons();
@@ -218,54 +273,45 @@ void VatTuPage::onTimKiemChanged() {
     lamMoiBang();
 }
 
-void VatTuPage::saveState() {
-    TreeVT snapshot = cloneCayVT(root);
-    pushState(undoStackTop, snapshot);
-    clearStack(redoStackTop);
-    updateUndoRedoButtons();
-}
-
 void VatTuPage::updateUndoRedoButtons() {
     ui->undoButton->setEnabled(undoStackTop != nullptr);
     ui->redoButton->setEnabled(redoStackTop != nullptr);
 }
 
-void VatTuPage::pushState(HistoryNodeVT*& top, TreeVT state) {
+void VatTuPage::pushEntry(HistoryNodeVT*& top, HistoryEntryVT entry) {
     HistoryNodeVT* node = new HistoryNodeVT();
-    node->state = state;
+    node->entry = entry;
     node->next = top;
     top = node;
 }
 
-TreeVT VatTuPage::popState(HistoryNodeVT*& top) {
-    if (!top) return nullptr;
+HistoryEntryVT VatTuPage::popEntry(HistoryNodeVT*& top) {
     HistoryNodeVT* temp = top;
-    TreeVT state = temp->state;
+    HistoryEntryVT entry = temp->entry;
     top = top->next;
     delete temp;
-    return state;
+    return entry;
 }
 
 void VatTuPage::clearStack(HistoryNodeVT*& top) {
     while (top) {
         HistoryNodeVT* temp = top;
         top = top->next;
-        huyCayVT(temp->state);
         delete temp;
     }
 }
 
 void VatTuPage::lamMoiBang() {
     int soLuong = 0;
-    VATTU* ds = duyetTheoTen(root, soLuong);
+    nodeVT** ds = duyetTheoTen(root, soLuong);
 
     QString keyword = ui->timKiemEdit->text().trimmed().toUpper();
 
     int soKhop = 0;
     for (int i = 0; i < soLuong; i++) {
-        QString mavt = QString::fromUtf8(ds[i].MAVT).toUpper();
-        QString tenvt = QString::fromUtf8(ds[i].TENVT).toUpper();
-        QString dvt = QString::fromUtf8(ds[i].DVT).toUpper();
+        QString mavt = QString::fromUtf8(ds[i]->vt.MAVT).toUpper();
+        QString tenvt = QString::fromUtf8(ds[i]->vt.TENVT).toUpper();
+        QString dvt = QString::fromUtf8(ds[i]->vt.DVT).toUpper();
         if (keyword.isEmpty() || mavt.contains(keyword) || tenvt.contains(keyword) || dvt.contains(keyword)) {
             soKhop++;
         }
@@ -274,14 +320,14 @@ void VatTuPage::lamMoiBang() {
     ui->table->setRowCount(soKhop);
     int row = 0;
     for (int i = 0; i < soLuong; i++) {
-        QString mavt = QString::fromUtf8(ds[i].MAVT).toUpper();
-        QString tenvt = QString::fromUtf8(ds[i].TENVT).toUpper();
-        QString dvt = QString::fromUtf8(ds[i].DVT).toUpper();
+        QString mavt = QString::fromUtf8(ds[i]->vt.MAVT).toUpper();
+        QString tenvt = QString::fromUtf8(ds[i]->vt.TENVT).toUpper();
+        QString dvt = QString::fromUtf8(ds[i]->vt.DVT).toUpper();
         if (keyword.isEmpty() || mavt.contains(keyword) || tenvt.contains(keyword) || dvt.contains(keyword)) {
-            ui->table->setItem(row, 0, new QTableWidgetItem(ds[i].MAVT));
-            ui->table->setItem(row, 1, new QTableWidgetItem(ds[i].TENVT));
-            ui->table->setItem(row, 2, new QTableWidgetItem(ds[i].DVT));
-            ui->table->setItem(row, 3, new QTableWidgetItem(QString::number(ds[i].SoLuongTon)));
+            ui->table->setItem(row, 0, new QTableWidgetItem(ds[i]->vt.MAVT));
+            ui->table->setItem(row, 1, new QTableWidgetItem(ds[i]->vt.TENVT));
+            ui->table->setItem(row, 2, new QTableWidgetItem(ds[i]->vt.DVT));
+            ui->table->setItem(row, 3, new QTableWidgetItem(QString::number(ds[i]->vt.SoLuongTon)));
             row++;
         }
     }
