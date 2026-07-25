@@ -8,8 +8,17 @@ namespace Ui {
 class VatTuPage;
 }
 
+enum LoaiThaoTac { THEM, SUA, XOA };
+
+// Ghi lai 1 hanh dong da xay ra, du de "dao nguoc" ma khong can chup ca cay
+struct HistoryEntryVT {
+    LoaiThaoTac loai;
+    VATTU truoc; // du lieu TRUOC khi thao tac (dung cho SUA, XOA)
+    VATTU sau;   // du lieu SAU khi thao tac (dung cho THEM, SUA)
+};
+
 struct HistoryNodeVT {
-    TreeVT state;
+    HistoryEntryVT entry;
     HistoryNodeVT* next;
 };
 
@@ -35,17 +44,19 @@ private:
     Ui::VatTuPage *ui;
     TreeVT &root;
     QString maVTDangSua;
+    QString tenVTGoc;
+    QString dvtGoc;
+    int soLuongGoc;
 
     HistoryNodeVT* undoStackTop;
     HistoryNodeVT* redoStackTop;
 
     void lamMoiBang();
     void resetForm();
-    void saveState();
     void updateUndoRedoButtons();
 
-    void pushState(HistoryNodeVT*& top, TreeVT state);
-    TreeVT popState(HistoryNodeVT*& top);
+    void pushEntry(HistoryNodeVT*& top, HistoryEntryVT entry);
+    HistoryEntryVT popEntry(HistoryNodeVT*& top);
     void clearStack(HistoryNodeVT*& top);
 };
 

@@ -74,15 +74,15 @@ void HoaDonPage::napNVCombo() {
 void HoaDonPage::napVTCombo() {
     ui->vtCombo->clear();
     int soLuong = 0;
-    VATTU* ds = duyetTheoTen(root, soLuong);
+    nodeVT** ds = duyetTheoTen(root, soLuong);
     for (int i = 0; i < soLuong; i++) {
         QString itemText = QString("%1 - %2 (Tồn: %3)")
-                               .arg(ds[i].MAVT)
-                               .arg(ds[i].TENVT)
-                               .arg(ds[i].SoLuongTon);
-        ui->vtCombo->addItem(itemText, QString(ds[i].MAVT));
+                               .arg(ds[i]->vt.MAVT)
+                               .arg(ds[i]->vt.TENVT)
+                               .arg(ds[i]->vt.SoLuongTon);
+        ui->vtCombo->addItem(itemText, QString(ds[i]->vt.MAVT));
     }
-    delete[] ds;
+    delete[] ds; // chi giai phong mang con tro, khong dung tung node (node thuoc ve cay)
 }
 
 void HoaDonPage::onThemCTClicked() {

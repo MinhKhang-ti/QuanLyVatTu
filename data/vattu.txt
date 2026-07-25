@@ -1,4 +1,4 @@
-N24|bàn học|cái|75
+N24|bàn học|cái|95
 N25|ghế nhựa|cái|40
 N26|quạt điện|cái|8
 N27|máy in|cái|3
@@ -13,7 +13,7 @@ N35|laptop|cái|10
 N36|ổ cắm điện|cái|18
 N37|dây mạng|mét|200
 N38|chuột máy tính|cái|30
-N39|bàn phím|cái|28
+N39|bàn phím|cái|33
 N40|máy quét|cái|4
 N41|camera|cái|16
 N42|máy lạnh|cái|7
