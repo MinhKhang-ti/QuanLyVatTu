@@ -1,5 +1,6 @@
 #include "hoadonlogic.h"
 #include <cstring>
+using namespace std;
 
 nodeHD* taoHoaDon(const char* soHD, Date ngay, char loai) {
     nodeHD* p = new nodeHD();
@@ -27,7 +28,7 @@ nodeHD* timHoaDon(PTRHD dshd, const char* soHD) {
 
 bool themCTHD(DS_CTHD& ds, const char* mavt, int soLuong, float donGia, float vat, std::string& loi) {
     if (ds.n >= SO_VT_TOIDA_MOI_HD) {
-        loi = "Hóa đơn đã đủ tối đa" + std::to_string(SO_VT_TOIDA_MOI_HD) + " vật tư";
+        loi = "Hóa đơn đã đủ tối đa" + to_string(SO_VT_TOIDA_MOI_HD) + " vật tư";
         return false;
     }
     for (int i = 0; i < ds.n; i++) {
@@ -45,7 +46,7 @@ bool themCTHD(DS_CTHD& ds, const char* mavt, int soLuong, float donGia, float va
     return true;
 }
 
-bool xoaCTHD(DS_CTHD& ds, const char* mavt, std::string& loi) {
+bool xoaCTHD(DS_CTHD& ds, const char* mavt, string& loi) {
     for (int i = 0; i < ds.n; i++) {
         if (strcmp(ds.nodes[i].MAVT, mavt) == 0) {
             for (int j = i; j < ds.n - 1; j++) ds.nodes[j] = ds.nodes[j + 1];
