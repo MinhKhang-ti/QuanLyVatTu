@@ -29,8 +29,9 @@ HoaDonPage::HoaDonPage(TreeVT &rootRef, DS_NHANVIEN &dsRef, QWidget *parent)
     ui->vatEdit->setValidator(new QRegularExpressionValidator(
         QRegularExpression("[0-9]{1,2}(\\.[0-9]{1,2})?"), this));
 
-    // Cấu hình ngày lập mặc định là ngày hiện tại
+    // Cấu hình ngày lập mặc định là ngày hiện tại và khóa không cho chỉnh sửa
     ui->ngayLapEdit->setDate(QDate::currentDate());
+    ui->ngayLapEdit->setEnabled(false);
 
     // Cấu hình bảng hiển thị chi tiết hóa đơn
     ui->tableCTHD->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -279,7 +280,6 @@ void HoaDonPage::resetForm() {
     ui->soHDEdit->clear();
     ui->soHDEdit->setEnabled(true);
     ui->nvCombo->setEnabled(true);
-    ui->ngayLapEdit->setEnabled(true);
     ui->loaiCombo->setEnabled(true);
 
     ui->soLuongEdit->clear();
@@ -298,7 +298,6 @@ void HoaDonPage::capNhatBangCTHD() {
     bool dangLap = (cthdTam.n > 0);
     ui->soHDEdit->setEnabled(!dangLap);
     ui->nvCombo->setEnabled(!dangLap);
-    ui->ngayLapEdit->setEnabled(!dangLap);
     ui->loaiCombo->setEnabled(!dangLap);
 
     ui->tableCTHD->setRowCount(cthdTam.n);

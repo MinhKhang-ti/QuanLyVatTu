@@ -10,8 +10,7 @@ CT|N24|50|100000|5
 HD|HD001|24|7|2026|N
 CT|N24|5|5000|5
 NV|NV03|Pham|Anh|Nam
-NV|1234567890|Phạm Đình Gia |Khang|Nam
-NV|NV02|Duy Anh|Phước|Nữ
+NV|NV02|Duy Anh|Phước|N�
 HD|HD412|26|7|2026|N
 CT|N41|5|20000|5
 NV|NV01|Minh|Xuyến|Nam
