@@ -126,30 +126,11 @@ void HoaDonPage::onThemCTClicked() {
 
     // Kiểm tra tồn kho nếu là Hóa đơn Xuất ('X')
     char loaiHD = (ui->loaiCombo->currentIndex() == 0) ? 'N' : 'X';
-    nodeVT* node = timVT(root, mavt.toStdString().c_str());
-
-    if (!node) {
-        ui->errorLabel->setText("Vật tư không tồn tại trong hệ thống!");
-        ui->errorLabel->setVisible(true);
-        return;
-    }
-
     if (loaiHD == 'X') {
-        // Tính tổng số lượng của vật tư này (nếu đã có trong cthdTam)
-        int soLuongDaChon = 0;
-        for (int i = 0; i < cthdTam.n; i++) {
-            if (strcmp(cthdTam.nodes[i].MAVT, mavt.toStdString().c_str()) == 0) {
-                soLuongDaChon += cthdTam.nodes[i].SoLuong;
-            }
-        }
-        int tonKho = node->vt.SoLuongTon;
-        if (soLuongDaChon + soLuong > tonKho) {
-            ui->errorLabel->setText(
-                QString("LỖI XUẤT HÀNG: Số lượng xuất vượt quá tồn kho!\n"
-                        "Vật tư [%1 - %2] hiện chỉ còn tồn: %3 trong kho.")
-                    .arg(node->vt.MAVT)
-                    .arg(node->vt.TENVT)
-                    .arg(tonKho));
+        int tonKho = 0;
+        std::string loiKiemTra;
+        if (!kiemTraKhaNangXuatKho(root, cthdTam, mavt.toStdString().c_str(), soLuong, tonKho, loiKiemTra)) {
+            ui->errorLabel->setText(QString::fromStdString(loiKiemTra));
             ui->errorLabel->setVisible(true);
             return;
         }
@@ -205,12 +186,10 @@ void HoaDonPage::onGhiClicked() {
     }
 
     // Kiểm tra Số HĐ đã tồn tại trong toàn bộ hệ thống chưa
-    for (int i = 0; i < dsnv.n; i++) {
-        if (timHoaDon(dsnv.nodes[i]->dshd, soHD.toStdString().c_str()) != nullptr) {
-            ui->errorLabel->setText("Số hóa đơn này đã tồn tại trong hệ thống! Vui lòng nhập số HĐ khác.");
-            ui->errorLabel->setVisible(true);
-            return;
-        }
+    if (isSoHDTonTaiHeThong(dsnv, soHD.toStdString().c_str())) {
+        ui->errorLabel->setText("Số hóa đơn này đã tồn tại trong hệ thống! Vui lòng nhập số HĐ khác.");
+        ui->errorLabel->setVisible(true);
+        return;
     }
 
     QString manv = ui->nvCombo->currentData().toString();
@@ -240,27 +219,10 @@ void HoaDonPage::onGhiClicked() {
 
     if (reply != QMessageBox::Yes) return;
 
-    // 1. Tạo Node Hóa đơn mới
-    nodeHD* hdMoi = taoHoaDon(soHD.toStdString().c_str(), ngayLap, loaiHD);
-    hdMoi->hd.dscthd = cthdTam;
+    // Ghi nhận hóa đơn và tự động cập nhật tồn kho trên cây BST Vật tư
+    ghiNhanHoaDon(dsnv, idxNV, root, soHD.toStdString().c_str(), ngayLap, loaiHD, cthdTam);
 
-    // 2. Thêm vào DSLK của Nhân viên
-    themHoaDonVaoDS(dsnv.nodes[idxNV]->dshd, hdMoi);
-    dsnv.nodes[idxNV]->CoHD = true;
-
-    // 3. Tự động cập nhật số lượng tồn trên Cây BST Vật tư
-    for (int i = 0; i < cthdTam.n; i++) {
-        nodeVT* node = timVT(root, cthdTam.nodes[i].MAVT);
-        if (node) {
-            if (loaiHD == 'N') {
-                node->vt.SoLuongTon += cthdTam.nodes[i].SoLuong;
-            } else if (loaiHD == 'X') {
-                node->vt.SoLuongTon -= cthdTam.nodes[i].SoLuong;
-            }
-        }
-    }
-
-    // 4. Lưu lại dữ liệu ra đĩa
+    // Lưu lại dữ liệu ra đĩa
     luuNhanVien(dsnv, FILE_NHANVIEN);
     luuVatTu(root, FILE_VATTU);
 

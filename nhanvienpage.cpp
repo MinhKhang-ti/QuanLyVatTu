@@ -173,7 +173,7 @@ void NhanVienPage::onXoaClicked() {
 
     saveState(); // Lưu trạng thái trước khi xóa
     
-    std::string loi;
+    string loi;
     bool ok = xoaNV(dsnv, manv.toStdString().c_str(), loi);
     if (!ok) {
         QMessageBox::critical(this, "Lỗi xóa nhân viên", QString::fromStdString(loi));
