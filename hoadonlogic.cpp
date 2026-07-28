@@ -1,5 +1,7 @@
 #include "hoadonlogic.h"
+#include "vattulogic.h"
 #include <cstring>
+using namespace std;
 
 nodeHD* taoHoaDon(const char* soHD, Date ngay, char loai) {
     nodeHD* p = new nodeHD();
@@ -25,9 +27,9 @@ nodeHD* timHoaDon(PTRHD dshd, const char* soHD) {
     return nullptr;
 }
 
-bool themCTHD(DS_CTHD& ds, const char* mavt, int soLuong, float donGia, float vat, std::string& loi) {
+bool themCTHD(DS_CTHD& ds, const char* mavt, int soLuong, float donGia, float vat, string& loi) {
     if (ds.n >= SO_VT_TOIDA_MOI_HD) {
-        loi = "Hóa đơn đã đủ tối đa" + std::to_string(SO_VT_TOIDA_MOI_HD) + " vật tư";
+        loi = "Hóa đơn đã đủ tối đa" + to_string(SO_VT_TOIDA_MOI_HD) + " vật tư";
         return false;
     }
     for (int i = 0; i < ds.n; i++) {
@@ -45,7 +47,7 @@ bool themCTHD(DS_CTHD& ds, const char* mavt, int soLuong, float donGia, float va
     return true;
 }
 
-bool xoaCTHD(DS_CTHD& ds, const char* mavt, std::string& loi) {
+bool xoaCTHD(DS_CTHD& ds, const char* mavt, string& loi) {
     for (int i = 0; i < ds.n; i++) {
         if (strcmp(ds.nodes[i].MAVT, mavt) == 0) {
             for (int j = i; j < ds.n - 1; j++) ds.nodes[j] = ds.nodes[j + 1];
@@ -74,4 +76,65 @@ void huyDSHoaDon(PTRHD& dshd) {
         dshd = dshd->next;
         delete t;
     }
+}
+
+bool isSoHDTonTaiHeThong(const DS_NHANVIEN& dsnv, const char* soHD) {
+    for (int i = 0; i < dsnv.n; i++) {
+        if (timHoaDon(dsnv.nodes[i]->dshd, soHD) != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool kiemTraKhaNangXuatKho(TreeVT root, const DS_CTHD& dsTam, const char* mavt, int soLuongThem, int& tonKho, string& loi) {
+    nodeVT* node = timVT(root, mavt);
+    if (!node) {
+        loi = "Vật tư không tồn tại trong hệ thống!";
+        return false;
+    }
+    tonKho = node->vt.SoLuongTon;
+
+    int soLuongDaChon = 0;
+    for (int i = 0; i < dsTam.n; i++) {
+        if (strcmp(dsTam.nodes[i].MAVT, mavt) == 0) {
+            soLuongDaChon += dsTam.nodes[i].SoLuong;
+        }
+    }
+
+    if (soLuongDaChon + soLuongThem > tonKho) {
+        loi = "LỖI XUẤT HÀNG: Số lượng xuất vượt quá tồn kho!\nVật tư [" + string(node->vt.MAVT) + " - " + string(node->vt.TENVT) + "] hiện chỉ còn tồn: " + to_string(tonKho) + " trong kho.";
+        return false;
+    }
+    return true;
+}
+
+void capNhatTonKhoKhiGhiHD(TreeVT root, const DS_CTHD& ds, char loaiHD) {
+    for (int i = 0; i < ds.n; i++) {
+        nodeVT* node = timVT(root, ds.nodes[i].MAVT);
+        if (node) {
+            if (loaiHD == 'N') {
+                node->vt.SoLuongTon += ds.nodes[i].SoLuong;
+            } else if (loaiHD == 'X') {
+                node->vt.SoLuongTon -= ds.nodes[i].SoLuong;
+            }
+        }
+    }
+}
+
+bool ghiNhanHoaDon(DS_NHANVIEN& dsnv, int idxNV, TreeVT root, const char* soHD, Date ngayLap, char loaiHD, const DS_CTHD& dscthd) {
+    if (idxNV < 0 || idxNV >= dsnv.n) return false;
+
+    // 1. Tạo node hóa đơn mới và gán dữ liệu chi tiết
+    nodeHD* hdMoi = taoHoaDon(soHD, ngayLap, loaiHD);
+    hdMoi->hd.dscthd = dscthd;
+
+    // 2. Thêm vào danh sách liên kết của nhân viên
+    themHoaDonVaoDS(dsnv.nodes[idxNV]->dshd, hdMoi);
+    dsnv.nodes[idxNV]->CoHD = true;
+
+    // 3. Tự động cập nhật số lượng tồn trên cây BST Vật tư
+    capNhatTonKhoKhiGhiHD(root, dscthd, loaiHD);
+
+    return true;
 }

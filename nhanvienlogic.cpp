@@ -117,7 +117,7 @@ bool xoaNV(DS_NHANVIEN &ds, const char *manv, string &loi) {
     }
 
     // Kiểm tra nếu nhân viên đã có hóa đơn trong hệ thống
-    if (ds.nodes[vitri]->CoHD || ds.nodes[vitri]->dshd != nullptr) {
+    if (ds.nodes[vitri]->dshd != nullptr) {
         loi = "Nhân viên này đã lập hóa đơn trong hệ thống, không được phép xóa!";
         return false;
     }

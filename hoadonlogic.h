@@ -16,4 +16,9 @@ double tinhTongTriGiaHD(const DS_CTHD& ds);
 
 void huyDSHoaDon(PTRHD& dshd);
 
+bool isSoHDTonTaiHeThong(const DS_NHANVIEN& dsnv, const char* soHD);
+bool kiemTraKhaNangXuatKho(TreeVT root, const DS_CTHD& dsTam, const char* mavt, int soLuongThem, int& tonKho, std::string& loi);
+void capNhatTonKhoKhiGhiHD(TreeVT root, const DS_CTHD& ds, char loaiHD);
+bool ghiNhanHoaDon(DS_NHANVIEN& dsnv, int idxNV, TreeVT root, const char* soHD, Date ngayLap, char loaiHD, const DS_CTHD& dscthd);
+
 #endif // HOADONLOGIC_H
