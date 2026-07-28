@@ -30,7 +30,7 @@ public:
     ~VatTuPage();
 
 private slots:
-    void validateForm();
+    void capNhatTrangThaiNut();
     void onThemClicked();
     void onXoaClicked();
     void onSuaClicked();

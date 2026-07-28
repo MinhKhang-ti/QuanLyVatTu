@@ -28,13 +28,14 @@ VatTuPage::VatTuPage(TreeVT &rootRef, QWidget *parent)
     ui->themButton->setEnabled(false);
     ui->suaButton->setEnabled(false);
     ui->huyButton->setEnabled(false);
+    ui->xoaButton->setEnabled(false);
 
     updateUndoRedoButtons();
 
-    connect(ui->maVTEdit, &QLineEdit::textChanged, this, &VatTuPage::validateForm);
-    connect(ui->tenVTEdit, &QLineEdit::textChanged, this, &VatTuPage::validateForm);
-    connect(ui->dvtEdit, &QLineEdit::textChanged, this, &VatTuPage::validateForm);
-    connect(ui->soLuongEdit, &QLineEdit::textChanged, this, &VatTuPage::validateForm);
+    connect(ui->maVTEdit, &QLineEdit::textChanged, this, &VatTuPage::capNhatTrangThaiNut);
+    connect(ui->tenVTEdit, &QLineEdit::textChanged, this, &VatTuPage::capNhatTrangThaiNut);
+    connect(ui->dvtEdit, &QLineEdit::textChanged, this, &VatTuPage::capNhatTrangThaiNut);
+    connect(ui->soLuongEdit, &QLineEdit::textChanged, this, &VatTuPage::capNhatTrangThaiNut);
     connect(ui->themButton, &QPushButton::clicked, this, &VatTuPage::onThemClicked);
     connect(ui->xoaButton, &QPushButton::clicked, this, &VatTuPage::onXoaClicked);
     connect(ui->suaButton, &QPushButton::clicked, this, &VatTuPage::onSuaClicked);
@@ -54,24 +55,43 @@ VatTuPage::~VatTuPage() {
     delete ui;
 }
 
-void VatTuPage::validateForm() {
-    QString loi;
-    if (ui->maVTEdit->text().trimmed().isEmpty()) loi = "Mã vật tư không được để trống";
-    else if (ui->tenVTEdit->text().trimmed().isEmpty()) loi = "Tên vật tư không được để trống";
-    else if (ui->dvtEdit->text().trimmed().isEmpty()) loi = "Đơn vị tính không được để trống";
-    else if (ui->soLuongEdit->text().trimmed().isEmpty()) loi = "Số lượng tồn không được để trống";
+void VatTuPage::capNhatTrangThaiNut() {
+    ui->errorLabel->setVisible(false);
 
-    if (!loi.isEmpty()) {
-        ui->errorLabel->setText(loi);
-        ui->errorLabel->setVisible(true);
-        ui->themButton->setEnabled(false);
+    bool dangSua = !maVTDangSua.isEmpty();
+
+    if (!dangSua) {
+        // CHE DO THEM: bat nut Them khi du 4 o, bat nut Huy khi da go gi do
+        bool duDuLieu = !ui->maVTEdit->text().trimmed().isEmpty()
+                        && !ui->tenVTEdit->text().trimmed().isEmpty()
+                        && !ui->dvtEdit->text().trimmed().isEmpty()
+                        && !ui->soLuongEdit->text().trimmed().isEmpty();
+
+        bool coGoGiDo = !ui->maVTEdit->text().isEmpty()
+                        || !ui->tenVTEdit->text().isEmpty()
+                        || !ui->dvtEdit->text().isEmpty()
+                        || !ui->soLuongEdit->text().isEmpty();
+
+        ui->themButton->setEnabled(duDuLieu);
+        ui->suaButton->setEnabled(false);
+        ui->huyButton->setEnabled(coGoGiDo);
     } else {
-        ui->errorLabel->setVisible(false);
-        ui->themButton->setEnabled(true);
+        // CHE DO SUA: bat nut Sua chi khi Ten/DVT khac so voi luc chon dong
+        bool coThayDoi = (ui->tenVTEdit->text() != tenVTGoc) || (ui->dvtEdit->text() != dvtGoc);
+
+        ui->themButton->setEnabled(false);
+        ui->suaButton->setEnabled(coThayDoi);
+        ui->huyButton->setEnabled(true); // dang sua thi luon co the huy
     }
 }
 
 void VatTuPage::onThemClicked() {
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Xác nhận thêm",
+        QString("Bạn có chắc chắn muốn thêm vật tư mới (Mã: %1)?").arg(ui->maVTEdit->text().toUpper()),
+        QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes) return;
+
     HistoryEntryVT entry{};
     entry.loai = THEM;
 
@@ -104,10 +124,6 @@ void VatTuPage::onThemClicked() {
 
 void VatTuPage::onXoaClicked() {
     int row = ui->table->currentRow();
-    if (row < 0) {
-        QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn vật tư muốn xóa từ bảng danh sách!");
-        return;
-    }
     QString mavt = ui->table->item(row, 0)->text();
     QString tenvt = ui->table->item(row, 1)->text();
 
@@ -188,6 +204,12 @@ void VatTuPage::onSuaClicked() {
 }
 
 void VatTuPage::onHuyClicked() {
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Xác nhận hủy",
+        "Bạn có chắc chắn muốn hủy thao tác hiện tại? Dữ liệu đang nhập sẽ mất.",
+        QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes) return;
+
     ui->table->clearSelection();
     ui->table->setCurrentCell(-1, -1);
     resetForm();
@@ -198,6 +220,7 @@ void VatTuPage::onTableSelectionChanged() {
     if (row < 0) {
         ui->suaButton->setEnabled(false);
         ui->huyButton->setEnabled(false);
+        ui->xoaButton->setEnabled(false);
         return;
     }
     maVTDangSua = ui->table->item(row, 0)->text();
@@ -214,13 +237,18 @@ void VatTuPage::onTableSelectionChanged() {
 
     ui->maVTEdit->setReadOnly(true);
     ui->soLuongEdit->setReadOnly(true);
-    ui->themButton->setEnabled(false);
-    ui->suaButton->setEnabled(true);
-    ui->huyButton->setEnabled(true);
+    ui->xoaButton->setEnabled(true);
+    capNhatTrangThaiNut();
 }
 
 void VatTuPage::onUndoClicked() {
     if (!undoStackTop) return;
+
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Xác nhận Undo",
+        "Bạn có chắc chắn muốn hoàn tác (Undo) thao tác gần nhất?",
+        QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes) return;
     HistoryEntryVT entry = popEntry(undoStackTop);
     std::string loi;
 
@@ -246,6 +274,12 @@ void VatTuPage::onUndoClicked() {
 
 void VatTuPage::onRedoClicked() {
     if (!redoStackTop) return;
+
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Xác nhận Redo",
+        "Bạn có chắc chắn muốn làm lại (Redo) thao tác vừa hoàn tác?",
+        QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes) return;
     HistoryEntryVT entry = popEntry(redoStackTop);
     std::string loi;
 
@@ -349,8 +383,8 @@ void VatTuPage::resetForm() {
     ui->soLuongEdit->setReadOnly(false);
     ui->suaButton->setEnabled(false);
     ui->huyButton->setEnabled(false);
+    ui->xoaButton->setEnabled(false);
     maVTDangSua.clear();
 
-    ui->errorLabel->setVisible(false);
-    ui->themButton->setEnabled(false);
+   capNhatTrangThaiNut();
 }
