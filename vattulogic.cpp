@@ -1,6 +1,5 @@
 #include "vattulogic.h"
 #include <cstring>
-#include <algorithm>
 
 nodeVT* taoNodeVT(const char* mavt, const char* tenvt, const char* dvt, int soLuongTon) {
     nodeVT* p = new nodeVT();
@@ -21,17 +20,15 @@ nodeVT* timVT(TreeVT root, const char* mavt) {
 
 bool themVT(TreeVT& root, const char* mavt, const char* tenvt, const char* dvt,
             int soLuongTon, std::string& loi) {
-    if (timVT(root, mavt) != nullptr) {
-        loi = "Ma vat tu da ton tai";
-        return false;
+    nodeVT** p = &root;
+    while (*p) {
+        int cmp = strcmp(mavt, (*p)->vt.MAVT);
+        if (cmp == 0) { loi = "Ma vat tu da ton tai"; return false; }
+        p = (cmp < 0) ? &(*p)->left :&(*p)->right;
     }
-    if (!root) {
-        root = taoNodeVT(mavt, tenvt, dvt, soLuongTon);
-        return true;
-    }
-    int cmp = strcmp(mavt, root->vt.MAVT);
-    if (cmp < 0) return themVT(root->left, mavt, tenvt, dvt, soLuongTon, loi);
-    return themVT(root->right, mavt, tenvt, dvt, soLuongTon, loi);
+
+    *p = taoNodeVT(mavt, tenvt, dvt, soLuongTon);
+    return true;
 }
 
 bool suaVT(TreeVT root, const char* mavt, const char* tenvtMoi, const char* dvtMoi,
@@ -43,28 +40,34 @@ bool suaVT(TreeVT root, const char* mavt, const char* tenvtMoi, const char* dvtM
     return true;
 }
 
-static nodeVT* timMin(nodeVT* node) {
-    while (node && node->left) node = node->left;
-    return node;
+static void removeMinAndCopy(TreeVT& r, nodeVT* victim) {
+    if (r->left) {
+        removeMinAndCopy(r->left, victim);
+    } else {
+        victim->vt = r->vt;     // Copy dữ liệu
+        nodeVT* t = r;
+        r = r->right;           // Nối lại trực tiếp
+        delete t;
+    }
 }
 
 bool xoaVT(TreeVT& root, const char* mavt, std::string& loi) {
     if (!root) { loi = "Khong tim thay vat tu"; return false; }
+
     int cmp = strcmp(mavt, root->vt.MAVT);
     if (cmp < 0) return xoaVT(root->left, mavt, loi);
     if (cmp > 0) return xoaVT(root->right, mavt, loi);
 
-    if (!root->left && !root->right) {
-        delete root; root = nullptr;
-    } else if (!root->left) {
-        nodeVT* t = root; root = root->right; delete t;
-    } else if (!root->right) {
-        nodeVT* t = root; root = root->left; delete t;
-    } else {
-        nodeVT* succ = timMin(root->right);
-        root->vt = succ->vt;
-        std::string tmp;
-        xoaVT(root->right, succ->vt.MAVT, tmp);
+    if (!root->right) {                 // 0 con hoặc 1 con trái
+        nodeVT* t = root;
+        root = root->left;
+        delete t;
+    } else if (!root->left) {           // 1 con phải
+        nodeVT* t = root;
+        root = root->right;
+        delete t;
+    } else {                            // 2 con
+        removeMinAndCopy(root->right, root);
     }
     return true;
 }
@@ -82,14 +85,30 @@ static void duyetInorderLayDiaChi(nodeVT* root, nodeVT* mang[], int& idx) {
     duyetInorderLayDiaChi(root->right, mang, idx);
 }
 
+static void bubbleSortTheoTen(nodeVT* mang[], int soLuong) {
+    for (int i = 0; i < soLuong - 1; i++) {
+        bool coHoanDoi = false;
+
+        for (int j = 0; j < soLuong - 1 - i; j++) {
+            if (strcmp(mang[j]->vt.TENVT, mang[j + 1]->vt.TENVT) > 0) {
+                nodeVT* tam = mang[j];
+                mang[j] = mang[j + 1];
+                mang[j + 1] = tam;
+                coHoanDoi = true;
+            }
+        }
+
+        if (!coHoanDoi) break;
+    }
+}
+
 nodeVT** duyetTheoTen(TreeVT root, int& soLuong) {
     soLuong = demSoVT(root);
     nodeVT** mang = new nodeVT*[soLuong];
     int idx = 0;
     duyetInorderLayDiaChi(root, mang, idx);
-    std::sort(mang, mang + soLuong, [](nodeVT* a, nodeVT* b) {
-        return strcmp(a->vt.TENVT, b->vt.TENVT) < 0;
-    });
+
+    bubbleSortTheoTen(mang, soLuong);
     return mang;
 }
 
