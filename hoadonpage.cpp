@@ -4,11 +4,13 @@
 #include "vattulogic.h"
 #include "nhanvienlogic.h"
 #include "fileio.h"
+#include "chonvattudialog.h"
 
 #include <QDate>
 #include <QMessageBox>
 #include <QRegularExpressionValidator>
 #include <QHeaderView>
+#include <QCompleter>
 #include <cstring>
 #include <algorithm>
 
@@ -42,6 +44,7 @@ HoaDonPage::HoaDonPage(TreeVT &rootRef, DS_NHANVIEN &dsRef, QWidget *parent)
     cthdTam.n = 0;
 
     // Kết nối tín hiệu nút bấm
+    connect(ui->chonVTButton, &QPushButton::clicked, this, &HoaDonPage::onChonVTClicked);
     connect(ui->themCTButton, &QPushButton::clicked, this, &HoaDonPage::onThemCTClicked);
     connect(ui->xoaCTButton, &QPushButton::clicked, this, &HoaDonPage::onXoaCTClicked);
     connect(ui->ghiButton, &QPushButton::clicked, this, &HoaDonPage::onGhiClicked);
@@ -58,7 +61,6 @@ HoaDonPage::~HoaDonPage()
 
 void HoaDonPage::napDuLieuCombo() {
     napNVCombo();
-    napVTCombo();
 }
 
 void HoaDonPage::napNVCombo() {
@@ -72,18 +74,19 @@ void HoaDonPage::napNVCombo() {
     }
 }
 
-void HoaDonPage::napVTCombo() {
-    ui->vtCombo->clear();
-    int soLuong = 0;
-    nodeVT** ds = duyetTheoTen(root, soLuong);
-    for (int i = 0; i < soLuong; i++) {
-        QString itemText = QString("%1 - %2 (Tồn: %3)")
-                               .arg(ds[i]->vt.MAVT)
-                               .arg(ds[i]->vt.TENVT)
-                               .arg(ds[i]->vt.SoLuongTon);
-        ui->vtCombo->addItem(itemText, QString(ds[i]->vt.MAVT));
+void HoaDonPage::onChonVTClicked() {
+    ChonVatTuDialog dlg(root, this);
+    if (dlg.exec() == QDialog::Accepted) {
+        VATTU vt = dlg.getSelectedVatTu();
+        selectedMAVT = QString::fromUtf8(vt.MAVT);
+        QString textInfo = QString("%1 - %2 (Tồn: %3)")
+                               .arg(vt.MAVT)
+                               .arg(vt.TENVT)
+                               .arg(vt.SoLuongTon);
+        ui->vtEdit->setText(textInfo);
+        ui->vtEdit->setToolTip(textInfo);
+        ui->errorLabel->setVisible(false);
     }
-    delete[] ds; // chi giai phong mang con tro, khong dung tung node (node thuoc ve cay)
 }
 
 void HoaDonPage::onThemCTClicked() {
@@ -102,13 +105,13 @@ void HoaDonPage::onThemCTClicked() {
         return;
     }
 
-    if (ui->vtCombo->currentIndex() < 0) {
-        ui->errorLabel->setText("Vui lòng chọn vật tư!");
+    if (selectedMAVT.isEmpty()) {
+        ui->errorLabel->setText("Vui lòng bấm 'Chọn...' để chọn vật tư!");
         ui->errorLabel->setVisible(true);
         return;
     }
 
-    QString mavt = ui->vtCombo->currentData().toString();
+    QString mavt = selectedMAVT;
     int soLuong = ui->soLuongEdit->text().toInt();
     float donGia = ui->donGiaEdit->text().toFloat();
     float vat = ui->vatEdit->text().toFloat();
@@ -144,6 +147,8 @@ void HoaDonPage::onThemCTClicked() {
         return;
     }
 
+    selectedMAVT.clear();
+    ui->vtEdit->clear();
     ui->soLuongEdit->clear();
     ui->donGiaEdit->clear();
     capNhatBangCTHD();
@@ -231,7 +236,6 @@ void HoaDonPage::onGhiClicked() {
 
     // Reset Form
     resetForm();
-    napVTCombo(); // Cập nhật lại tồn kho mới trên combobox
 }
 
 void HoaDonPage::onHuyClicked() {
@@ -244,6 +248,9 @@ void HoaDonPage::resetForm() {
     ui->nvCombo->setEnabled(true);
     ui->loaiCombo->setEnabled(true);
 
+    selectedMAVT.clear();
+    ui->vtEdit->clear();
+    ui->vtEdit->setToolTip("");
     ui->soLuongEdit->clear();
     ui->donGiaEdit->clear();
     ui->vatEdit->setText("5");
@@ -261,6 +268,8 @@ void HoaDonPage::capNhatBangCTHD() {
     ui->soHDEdit->setEnabled(!dangLap);
     ui->nvCombo->setEnabled(!dangLap);
     ui->loaiCombo->setEnabled(!dangLap);
+    ui->xoaCTButton->setEnabled(dangLap);
+    ui->ghiButton->setEnabled(dangLap);
 
     ui->tableCTHD->setRowCount(cthdTam.n);
     double tongTienHD = 0;

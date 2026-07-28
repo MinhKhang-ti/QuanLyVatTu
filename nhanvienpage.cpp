@@ -13,10 +13,6 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Khởi tạo các đỉnh ngăn xếp bằng con trỏ null
-    undoStackTop = nullptr;
-    redoStackTop = nullptr;
-
     // Cấu hình validator cho Mã nhân viên
     ui->manvEdit->setValidator(new QRegularExpressionValidator(
         QRegularExpression("[A-Za-z0-9]{0,10}"), this));
@@ -30,9 +26,6 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
     ui->themButton->setEnabled(false);
     ui->suaButton->setEnabled(false);
     ui->huyButton->setEnabled(false);
-    
-    // Khởi tạo trạng thái nút Undo/Redo ban đầu
-    updateUndoRedoButtons();
 
     // Kết nối các tín hiệu nhập liệu
     connect(ui->manvEdit, &QLineEdit::textChanged, this, &NhanVienPage::validateForm);
@@ -47,8 +40,6 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
     connect(ui->suaButton, &QPushButton::clicked, this, &NhanVienPage::onSuaClicked);
     connect(ui->xoaButton, &QPushButton::clicked, this, &NhanVienPage::onXoaClicked);
     connect(ui->huyButton, &QPushButton::clicked, this, &NhanVienPage::onHuyClicked);
-    connect(ui->undoButton, &QPushButton::clicked, this, &NhanVienPage::onUndoClicked);
-    connect(ui->redoButton, &QPushButton::clicked, this, &NhanVienPage::onRedoClicked);
     
     // Kết nối sự kiện đúp chuột vào bảng để sửa thông tin nhân viên
     connect(ui->table, &QTableWidget::cellDoubleClicked, this, &NhanVienPage::onCellDoubleClicked);
@@ -57,9 +48,6 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
 }
 
 NhanVienPage::~NhanVienPage() {
-    // Giải phóng bộ nhớ của các ngăn xếp lưu lịch sử
-    clearStack(undoStackTop);
-    clearStack(redoStackTop);
     delete ui;
 }
 
@@ -88,8 +76,6 @@ void NhanVienPage::validateForm() {
 }
 
 void NhanVienPage::onThemClicked() {
-    saveState(); // Lưu trạng thái trước khi thực hiện thêm mới
-    
     std::string loi;
     bool ok = themNV(dsnv,
                      ui->manvEdit->text().toUpper().toStdString().c_str(),
@@ -100,11 +86,6 @@ void NhanVienPage::onThemClicked() {
     if (!ok) {
         ui->errorLabel->setText(QString::fromStdString(loi));
         ui->errorLabel->setVisible(true);
-        
-        // Hủy lưu trạng thái nếu thêm thất bại
-        DS_NHANVIEN* failedState = popState(undoStackTop);
-        freeState(failedState);
-        updateUndoRedoButtons();
         return;
     }
     
@@ -128,8 +109,6 @@ void NhanVienPage::onSuaClicked() {
         return;
     }
 
-    saveState(); // Lưu trạng thái trước khi chỉnh sửa
-
     std::string loi;
     bool ok = suaNV(dsnv,
                     manv.toUpper().toStdString().c_str(),
@@ -140,11 +119,6 @@ void NhanVienPage::onSuaClicked() {
     if (!ok) {
         ui->errorLabel->setText(QString::fromStdString(loi));
         ui->errorLabel->setVisible(true);
-
-        // Hủy lưu trạng thái nếu sửa thất bại
-        DS_NHANVIEN* failedState = popState(undoStackTop);
-        freeState(failedState);
-        updateUndoRedoButtons();
         return;
     }
 
@@ -170,18 +144,11 @@ void NhanVienPage::onXoaClicked() {
     if (reply != QMessageBox::Yes) {
         return;
     }
-
-    saveState(); // Lưu trạng thái trước khi xóa
     
-    string loi;
+    std::string loi;
     bool ok = xoaNV(dsnv, manv.toStdString().c_str(), loi);
     if (!ok) {
         QMessageBox::critical(this, "Lỗi xóa nhân viên", QString::fromStdString(loi));
-        
-        // Hủy lưu trạng thái nếu xóa thất bại
-        DS_NHANVIEN* failedState = popState(undoStackTop);
-        freeState(failedState);
-        updateUndoRedoButtons();
         return;
     }
     
@@ -208,6 +175,7 @@ void NhanVienPage::onHuyClicked() {
 }
 
 void NhanVienPage::onCellDoubleClicked(int row, int column) {
+    Q_UNUSED(column);
     if (row < 0) return;
 
     QTableWidgetItem* itemMa = ui->table->item(row, 0);
@@ -230,174 +198,6 @@ void NhanVienPage::onCellDoubleClicked(int row, int column) {
 
 void NhanVienPage::onTimKiemChanged() {
     lamMoiBang();
-}
-
-void NhanVienPage::onUndoClicked() {
-    if (undoStackTop == nullptr) return;
-
-    // Lấy trạng thái trước đó từ ngăn xếp (nhưng chưa pop vội để kiểm tra an toàn)
-    DS_NHANVIEN* previousState = undoStackTop->state;
-
-    // Kiểm tra an toàn: Không cho phép Undo nếu làm biến mất nhân viên đã lập hóa đơn
-    for (int i = 0; i < dsnv.n; i++) {
-        int idx = timViTriNV(*previousState, dsnv.nodes[i]->MANV);
-        if (idx == -1) { // Nhân viên này sẽ bị xóa nếu ta thực hiện Undo
-            if (dsnv.nodes[i]->CoHD || dsnv.nodes[i]->dshd != nullptr) {
-                QMessageBox::warning(this, "Không thể Undo", 
-                    QString("Không thể quay lại thao tác vì nhân viên %1 (Mã: %2) đã lập hóa đơn trong hệ thống!")
-                    .arg(dsnv.nodes[i]->TEN).arg(dsnv.nodes[i]->MANV));
-                return; 
-            }
-        }
-    }
-
-    // Tiến hành lấy trạng thái ra khỏi ngăn xếp
-    previousState = popState(undoStackTop);
-
-    // Lưu trạng thái hiện tại vào redoStack
-    DS_NHANVIEN* currentState = cloneState(dsnv);
-    pushState(redoStackTop, currentState);
-
-    // Giải phóng bộ nhớ động của danh sách dsnv hiện tại (giữ lại danh sách hóa đơn)
-    for (int i = 0; i < dsnv.n; i++) {
-        // Chuyển giao con trỏ hóa đơn mới nhất sang trạng thái khôi phục
-        int idxBackup = timViTriNV(*previousState, dsnv.nodes[i]->MANV);
-        if (idxBackup != -1) {
-            previousState->nodes[idxBackup]->dshd = dsnv.nodes[i]->dshd;
-        }
-        delete dsnv.nodes[i];
-    }
-
-    // Phục hồi dữ liệu
-    dsnv.n = previousState->n;
-    for (int i = 0; i < previousState->n; i++) {
-        dsnv.nodes[i] = previousState->nodes[i];
-    }
-
-    previousState->n = 0;
-    delete previousState;
-
-    lamMoiBang();
-    onHuyClicked();
-    updateUndoRedoButtons();
-    luuNhanVien(dsnv, FILE_NHANVIEN);
-}
-
-void NhanVienPage::onRedoClicked() {
-    if (redoStackTop == nullptr) return;
-
-    // Lấy trạng thái tiếp theo từ ngăn xếp (nhưng chưa pop vội để kiểm tra an toàn)
-    DS_NHANVIEN* nextState = redoStackTop->state;
-
-    // Kiểm tra an toàn: Không cho phép Redo nếu làm biến mất nhân viên đã lập hóa đơn
-    for (int i = 0; i < dsnv.n; i++) {
-        int idx = timViTriNV(*nextState, dsnv.nodes[i]->MANV);
-        if (idx == -1) { // Nhân viên này sẽ bị xóa nếu ta thực hiện Redo
-            if (dsnv.nodes[i]->CoHD || dsnv.nodes[i]->dshd != nullptr) {
-                QMessageBox::warning(this, "Không thể Redo", 
-                    QString("Không thể làm lại thao tác vì nhân viên %1 (Mã: %2) đã lập hóa đơn trong hệ thống!")
-                    .arg(dsnv.nodes[i]->TEN).arg(dsnv.nodes[i]->MANV));
-                return;
-            }
-        }
-    }
-    // Tiến hành lấy trạng thái ra khỏi ngăn xếp
-    nextState = popState(redoStackTop);
-
-    // Lưu trạng thái hiện tại vào undoStack
-    DS_NHANVIEN* currentState = cloneState(dsnv);
-    pushState(undoStackTop, currentState);
-
-    // Giải phóng bộ nhớ động của danh sách dsnv hiện tại (giữ lại danh sách hóa đơn)
-    for (int i = 0; i < dsnv.n; i++) {
-        // Chuyển giao con trỏ hóa đơn mới nhất sang trạng thái khôi phục
-        int idxBackup = timViTriNV(*nextState, dsnv.nodes[i]->MANV);
-        if (idxBackup != -1) {
-            nextState->nodes[idxBackup]->dshd = dsnv.nodes[i]->dshd;
-        }
-        delete dsnv.nodes[i];
-    }
-
-    // Phục hồi dữ liệu
-    dsnv.n = nextState->n;
-    for (int i = 0; i < nextState->n; i++) {
-        dsnv.nodes[i] = nextState->nodes[i];
-    }
-
-    nextState->n = 0;
-    delete nextState;
-
-    lamMoiBang();
-    onHuyClicked();
-    updateUndoRedoButtons();
-    luuNhanVien(dsnv, FILE_NHANVIEN);
-}
-
-void NhanVienPage::saveState() {
-    DS_NHANVIEN* state = cloneState(dsnv);
-    pushState(undoStackTop, state);
-
-    // Khi có hành động mới, xóa toàn bộ redoStack
-    clearStack(redoStackTop);
-    updateUndoRedoButtons();
-}
-
-void NhanVienPage::updateUndoRedoButtons() {
-    ui->undoButton->setEnabled(undoStackTop != nullptr);
-    ui->redoButton->setEnabled(redoStackTop != nullptr);
-}
-
-// Các hàm thao tác ngăn xếp lưu lịch sử bằng Danh sách liên kết đơn
-void NhanVienPage::pushState(HistoryNode*& top, DS_NHANVIEN* state) {
-    HistoryNode* node = new HistoryNode();
-    node->state = state;
-    node->next = top;
-    top = node;
-}
-
-DS_NHANVIEN* NhanVienPage::popState(HistoryNode*& top) {
-    if (top == nullptr) return nullptr;
-    HistoryNode* temp = top;
-    DS_NHANVIEN* state = temp->state;
-    top = top->next;
-    delete temp;
-    return state;
-}
-
-void NhanVienPage::clearStack(HistoryNode*& top) {
-    while (top != nullptr) {
-        HistoryNode* temp = top;
-        top = top->next;
-        freeState(temp->state);
-        delete temp;
-    }
-}
-
-DS_NHANVIEN* NhanVienPage::cloneState(const DS_NHANVIEN &source) {
-    DS_NHANVIEN* clone = new DS_NHANVIEN();
-    clone->n = source.n;
-    for (int i = 0; i < source.n; i++) {
-        NHANVIEN* nv = new NHANVIEN();
-        strcpy(nv->MANV, source.nodes[i]->MANV);
-        strcpy(nv->HO, source.nodes[i]->HO);
-        strcpy(nv->TEN, source.nodes[i]->TEN);
-        strcpy(nv->PHAI, source.nodes[i]->PHAI);
-        nv->CoHD = source.nodes[i]->CoHD;
-
-        // Lưu trữ nông con trỏ hóa đơn hiện hành, không sao chép sâu để bảo toàn lịch sử hóa đơn
-        nv->dshd = source.nodes[i]->dshd;
-        clone->nodes[i] = nv;
-    }
-    return clone;
-}
-
-void NhanVienPage::freeState(DS_NHANVIEN* state) {
-    if (!state) return;
-    for (int i = 0; i < state->n; i++) {
-        // Chỉ giải phóng vùng nhớ nhân viên của bản lưu lịch sử, không xóa dshd đang chạy
-        delete state->nodes[i];
-    }
-    delete state;
 }
 
 void NhanVienPage::lamMoiBang() {

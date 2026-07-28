@@ -19,6 +19,7 @@ qt_add_executable(QLVT
     hoadonlogic.h hoadonlogic.cpp
     thongkelogic.h thongkelogic.cpp
     hoadonpage.h hoadonpage.cpp hoadonpage.ui
+    chonvattudialog.h chonvattudialog.cpp chonvattudialog.ui
     thongkepage.h thongkepage.cpp thongkepage.ui
     fileio.h fileio.cpp
     data/vattu.txt

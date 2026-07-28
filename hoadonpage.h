@@ -19,6 +19,7 @@ public:
     void napDuLieuCombo();
 
 private slots:
+    void onChonVTClicked();
     void onThemCTClicked();
     void onXoaCTClicked();
     void onGhiClicked();
@@ -30,9 +31,9 @@ private:
     DS_NHANVIEN &dsnv;
 
     DS_CTHD cthdTam; // Mảng tạm lưu các vật tư đang lập của hóa đơn hiện tại
+    QString selectedMAVT; // Mã vật tư đang được chọn từ Dialog
 
     void napNVCombo();
-    void napVTCombo();
     void capNhatBangCTHD();
     void resetForm();
 };
