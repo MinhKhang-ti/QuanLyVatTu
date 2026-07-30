@@ -21,4 +21,6 @@ bool kiemTraKhaNangXuatKho(TreeVT root, const DS_CTHD& dsTam, const char* mavt, 
 void capNhatTonKhoKhiGhiHD(TreeVT root, const DS_CTHD& ds, char loaiHD);
 bool ghiNhanHoaDon(DS_NHANVIEN& dsnv, int idxNV, TreeVT root, const char* soHD, Date ngayLap, char loaiHD, const DS_CTHD& dscthd);
 
+
+nodeHD* timHoaDonTrongHeThong(const DS_NHANVIEN& dsnv, const char* soHD, int& idxNV);
 #endif // HOADONLOGIC_H
