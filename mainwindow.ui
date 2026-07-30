@@ -63,13 +63,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="bntInHoaDon">
-         <property name="text">
-          <string>IN HÓA ĐƠN</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="btnThongKe">
          <property name="text">
           <string>THỐNG KÊ</string>
