@@ -138,3 +138,12 @@ bool ghiNhanHoaDon(DS_NHANVIEN& dsnv, int idxNV, TreeVT root, const char* soHD, 
 
     return true;
 }
+
+nodeHD* timHoaDonTrongHeThong(const DS_NHANVIEN& dsnv, const char* soHD, int& idxNV) {
+    for (int i = 0; i < dsnv.n; i++) {
+        nodeHD* hd = timHoaDon(dsnv.nodes[i]->dshd, soHD);
+        if (hd) { idxNV = i; return hd; }
+    }
+    idxNV = -1;
+    return nullptr;
+}

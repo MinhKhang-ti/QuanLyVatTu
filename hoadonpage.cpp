@@ -5,6 +5,7 @@
 #include "nhanvienlogic.h"
 #include "fileio.h"
 #include "chonvattudialog.h"
+#include "inhoadondialog.h"
 
 #include <QDate>
 #include <QMessageBox>
@@ -12,7 +13,7 @@
 #include <QHeaderView>
 #include <QCompleter>
 #include <cstring>
-#include <algorithm>
+
 
 HoaDonPage::HoaDonPage(TreeVT &rootRef, DS_NHANVIEN &dsRef, QWidget *parent)
     : QWidget(parent), ui(new Ui::HoaDonPage), root(rootRef), dsnv(dsRef)
@@ -49,6 +50,7 @@ HoaDonPage::HoaDonPage(TreeVT &rootRef, DS_NHANVIEN &dsRef, QWidget *parent)
     connect(ui->xoaCTButton, &QPushButton::clicked, this, &HoaDonPage::onXoaCTClicked);
     connect(ui->ghiButton, &QPushButton::clicked, this, &HoaDonPage::onGhiClicked);
     connect(ui->huyButton, &QPushButton::clicked, this, &HoaDonPage::onHuyClicked);
+    connect(ui->inHDButton, &QPushButton::clicked, this, &HoaDonPage::onInHoaDonClicked);
 
     napDuLieuCombo();
     capNhatBangCTHD();
@@ -240,6 +242,11 @@ void HoaDonPage::onGhiClicked() {
 
 void HoaDonPage::onHuyClicked() {
     resetForm();
+}
+
+void HoaDonPage::onInHoaDonClicked() {
+    InHoaDonDialog dlg(root, dsnv, this);
+    dlg.exec();
 }
 
 void HoaDonPage::resetForm() {

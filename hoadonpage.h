@@ -24,6 +24,7 @@ private slots:
     void onXoaCTClicked();
     void onGhiClicked();
     void onHuyClicked();
+    void onInHoaDonClicked();
 
 private:
     Ui::HoaDonPage *ui;

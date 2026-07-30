@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1019</width>
-    <height>668</height>
+    <height>763</height>
    </rect>
   </property>
   <property name="font">
@@ -320,6 +320,13 @@
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="inHDButton">
+        <property name="text">
+         <string>In hóa đơn</string>
+        </property>
        </widget>
       </item>
       <item>
