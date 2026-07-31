@@ -14,6 +14,7 @@ class NhanVienPage : public QWidget
 public:
     explicit NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent = nullptr);
     ~NhanVienPage();
+    void lamMoiBang();
 
 private slots:
     void validateForm();
@@ -27,8 +28,6 @@ private slots:
 private:
     Ui::NhanVienPage *ui;
     DS_NHANVIEN &dsnv; // tham chieu toi mang dung chung
-
-    void lamMoiBang();
 };
 
 #endif // NHANVIENPAGE_H

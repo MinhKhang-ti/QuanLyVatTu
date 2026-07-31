@@ -11,6 +11,7 @@ class VatTuPage : public QWidget
 public:
     explicit VatTuPage(TreeVT &rootRef, QWidget *parent = nullptr);
     ~VatTuPage();
+    void lamMoiBang();
 private slots:
     void capNhatTrangThaiNut();
     void onThemClicked();
@@ -26,7 +27,6 @@ private:
     QString tenVTGoc;
     QString dvtGoc;
     int soLuongGoc;
-    void lamMoiBang();
     void resetForm();
 };
 #endif // VATTUPAGE_H

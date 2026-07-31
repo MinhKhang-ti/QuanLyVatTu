@@ -13,9 +13,13 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Cấu hình validator cho Mã nhân viên
+    // Cấu hình validator cho Mã nhân viên (chặn khoảng trắng, tối đa 10 ký tự chữ và số)
     ui->manvEdit->setValidator(new QRegularExpressionValidator(
         QRegularExpression("[A-Za-z0-9]{0,10}"), this));
+
+    // Cấu hình validator cho Tên nhân viên (chặn khoảng trắng, tối đa 20 ký tự)
+    ui->tenEdit->setValidator(new QRegularExpressionValidator(
+        QRegularExpression("[^\\s]{0,20}"), this));
 
     // Cấu hình bảng hiển thị
     ui->table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -76,11 +80,15 @@ void NhanVienPage::validateForm() {
 }
 
 void NhanVienPage::onThemClicked() {
+    QString manv = ui->manvEdit->text().toUpper().simplified();
+    QString ho = ui->hoEdit->text().simplified();
+    QString ten = ui->tenEdit->text().simplified();
+
     std::string loi;
     bool ok = themNV(dsnv,
-                     ui->manvEdit->text().toUpper().toStdString().c_str(),
-                     ui->hoEdit->text().toStdString().c_str(),
-                     ui->tenEdit->text().toStdString().c_str(),
+                     manv.toStdString().c_str(),
+                     ho.toStdString().c_str(),
+                     ten.toStdString().c_str(),
                      ui->phaiCombo->currentText().toStdString().c_str(),
                      loi);
     if (!ok) {
@@ -97,7 +105,7 @@ void NhanVienPage::onThemClicked() {
 }
 
 void NhanVienPage::onSuaClicked() {
-    QString manv = ui->manvEdit->text().trimmed();
+    QString manv = ui->manvEdit->text().toUpper().simplified();
     if (manv.isEmpty()) return;
 
     // Hiển thị hộp thoại hỏi xác nhận trước khi sửa thông tin
@@ -109,11 +117,14 @@ void NhanVienPage::onSuaClicked() {
         return;
     }
 
+    QString ho = ui->hoEdit->text().simplified();
+    QString ten = ui->tenEdit->text().simplified();
+
     std::string loi;
     bool ok = suaNV(dsnv,
-                    manv.toUpper().toStdString().c_str(),
-                    ui->hoEdit->text().toStdString().c_str(),
-                    ui->tenEdit->text().toStdString().c_str(),
+                    manv.toStdString().c_str(),
+                    ho.toStdString().c_str(),
+                    ten.toStdString().c_str(),
                     ui->phaiCombo->currentText().toStdString().c_str(),
                     loi);
     if (!ok) {

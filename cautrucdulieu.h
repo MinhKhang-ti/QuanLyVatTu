@@ -14,6 +14,7 @@ struct VATTU {
     char TENVT[51];
     char DVT[11];
     int SoLuongTon;
+    bool DaXuatHienTrongHD = false;
 };
 struct nodeVT {
     VATTU vt;

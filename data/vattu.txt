@@ -1,21 +1,19 @@
-VT024|bàn học|cái|115
-VT023|sạc điện thoại|cái|20
-VT025|ghế nhựa|cái|40
-VT026|quạt điện|cái|8
-VT027|máy in|cái|3
-VT028|máy chiếu|cái|2
-VT029|bảng trắng|cái|10
-VT030|bút lông|cây|120
-VT031|giấy A4|ram|50
-VT032|kệ sách|cái|6
-VT033|đèn LED|cái|25
-VT034|máy tính để bàn|bộ|12
-VT035|laptop|cái|10
-VT036|ổ cắm điện|cái|18
-VT037|dây mạng|mét|200
-VT038|chuột máy tính|cái|30
-VT039|bàn phím|cái|33
-VT040|máy quét|cái|4
-VT041|camera|cái|16
-VT042|máy lạnh|cái|7
-VT043|loa|cái|9
+VT025|ghế nhựa|cái|40|0
+VT023|sạc điện thoại|cái|20|0
+VT001|Đèn|Cái|10000|0
+VT026|quạt điện|cái|8|0
+VT027|máy in|cái|3|0
+VT028|máy chiếu|cái|2|0
+VT029|bảng trắng|cái|10|0
+VT031|giấy A4|ram|50|0
+VT032|kệ sách|cái|6|0
+VT033|đèn LED|cái|25|0
+VT034|máy tính để bàn|bộ|12|0
+VT035|laptop|cái|10|0
+VT036|ổ cắm điện|cái|18|0
+VT037|dây mạng|mét|200|0
+VT038|chuột máy tính|cái|30|0
+VT040|máy quét|cái|4|0
+VT041|camera|cái|36|1
+VT042|máy lạnh|cái|7|0
+VT043|loa|cái|9|0

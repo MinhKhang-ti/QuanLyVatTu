@@ -52,10 +52,10 @@ bool themNV(DS_NHANVIEN &ds, const char *manv, const char *ho, const char *ten, 
     }
 
     NHANVIEN* nv = new NHANVIEN();
-    strcpy(nv->MANV, manv);
-    strcpy(nv->HO, ho);
-    strcpy(nv->TEN, ten);
-    strcpy(nv->PHAI, phai);
+    strncpy(nv->MANV, manv, 10); nv->MANV[10] = '\0';
+    strncpy(nv->HO, ho, 30); nv->HO[30] = '\0';
+    strncpy(nv->TEN, ten, 20); nv->TEN[20] = '\0';
+    strncpy(nv->PHAI, phai, 3); nv->PHAI[3] = '\0';
     nv->CoHD = false;
     nv->dshd = nullptr;
 
@@ -91,9 +91,9 @@ bool suaNV(DS_NHANVIEN &ds, const char *manv, const char *hoMoi, const char *ten
         ds.n--;
 
         // Ghi thông tin mới
-        strcpy(nv->HO, hoMoi);
-        strcpy(nv->TEN, tenMoi);
-        strcpy(nv->PHAI, phaiMoi);
+        strncpy(nv->HO, hoMoi, 30); nv->HO[30] = '\0';
+        strncpy(nv->TEN, tenMoi, 20); nv->TEN[20] = '\0';
+        strncpy(nv->PHAI, phaiMoi, 3); nv->PHAI[3] = '\0';
 
         // Tìm vị trí chèn mới
         int viTriMoi = timViTriChen(ds, tenMoi, hoMoi);
@@ -103,7 +103,7 @@ bool suaNV(DS_NHANVIEN &ds, const char *manv, const char *hoMoi, const char *ten
         ds.nodes[viTriMoi] = nv;
         ds.n++;
     } else {
-        strcpy(nv->PHAI, phaiMoi);
+        strncpy(nv->PHAI, phaiMoi, 3); nv->PHAI[3] = '\0';
     }
     return true;
 }
