@@ -25,6 +25,7 @@ private:
     QLabel* thongTinLabel;
     QTableWidget* table;
     QLabel* tongTienLabel;
+    QLabel* tienChuLabel;
     QLabel* errorLabel;
 
     void napDanhSachHD();          // MỚI — đổ toàn bộ hóa đơn vào danhSachTable

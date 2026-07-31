@@ -36,7 +36,7 @@ bool suaVT(TreeVT root, const char* mavt, const char* tenvtMoi, const char* dvtM
     nodeVT* p = timVT(root, mavt);
     if (!p) { loi = "Khong tim thay vat tu"; return false; }
     if (p->vt.DaXuatHienTrongHD) {
-        loi = "Vat tu da xuat hien trong hoa don da ghi, khong duoc phep sua!";
+        loi = "Vật tư đã xuất hiện trong hóa đơn! Không được phép sửa";
         return false;
     }
     strncpy(p->vt.TENVT, tenvtMoi, 50); p->vt.TENVT[50] = '\0';

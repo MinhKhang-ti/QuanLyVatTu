@@ -4,6 +4,7 @@
 #include "cautrucdulieu.h"
 #include <string>
 
+
 nodeHD* taoHoaDon(const char* soHD, Date ngay, char loai);
 void themHoaDonVaoDS(PTRHD& dshd, nodeHD* hdMoi);
 nodeHD* timHoaDon(PTRHD dshd, const char* soHD);
@@ -23,4 +24,6 @@ bool ghiNhanHoaDon(DS_NHANVIEN& dsnv, int idxNV, TreeVT root, const char* soHD, 
 
 
 nodeHD* timHoaDonTrongHeThong(const DS_NHANVIEN& dsnv, const char* soHD, int& idxNV);
+
+std::string docSoThanhChu(long long soTien);
 #endif // HOADONLOGIC_H

@@ -52,25 +52,29 @@ void VatTuPage::capNhatTrangThaiNut() {
     bool dangSua = !maVTDangSua.isEmpty();
 
     if (!dangSua) {
+        // CHE DO THEM — giữ nguyên, không đổi gì
         bool duDuLieu = !ui->maVTEdit->text().trimmed().isEmpty()
-        && !ui->tenVTEdit->text().trimmed().isEmpty()
-            && !ui->dvtEdit->text().trimmed().isEmpty()
-            && !ui->soLuongEdit->text().trimmed().isEmpty();
-
+                        && !ui->tenVTEdit->text().trimmed().isEmpty()
+                        && !ui->dvtEdit->text().trimmed().isEmpty()
+                        && !ui->soLuongEdit->text().trimmed().isEmpty();
         bool coGoGiDo = !ui->maVTEdit->text().isEmpty()
                         || !ui->tenVTEdit->text().isEmpty()
                         || !ui->dvtEdit->text().isEmpty()
                         || !ui->soLuongEdit->text().isEmpty();
-
         ui->themButton->setEnabled(duDuLieu);
         ui->suaButton->setEnabled(false);
         ui->huyButton->setEnabled(coGoGiDo);
     } else {
-        bool coThayDoi = (ui->tenVTEdit->text() != tenVTGoc) || (ui->dvtEdit->text() != dvtGoc);
-
+        // CHE DO SUA
         ui->themButton->setEnabled(false);
-        ui->suaButton->setEnabled(coThayDoi);
-        ui->huyButton->setEnabled(true);
+        if (dangKhoa) {                              //ưu tiên kiểm tra khóa TRƯỚC
+            ui->suaButton->setEnabled(false);
+            ui->huyButton->setEnabled(true);
+        } else {
+            bool coThayDoi = (ui->tenVTEdit->text() != tenVTGoc) || (ui->dvtEdit->text() != dvtGoc);
+            ui->suaButton->setEnabled(coThayDoi);
+            ui->huyButton->setEnabled(true);
+        }
     }
 }
 
@@ -179,10 +183,22 @@ void VatTuPage::onTableSelectionChanged() {
     dvtGoc = ui->table->item(row, 2)->text();
     soLuongGoc = ui->table->item(row, 3)->text().toInt();
 
+    // tra thẳng trên cây, biết ngay lúc này vật tư có bị khóa không
+    nodeVT* node = timVT(root, maVTDangSua.toStdString().c_str());
+    dangKhoa = node && node->vt.DaXuatHienTrongHD;
+
     ui->maVTEdit->setReadOnly(true);
     ui->soLuongEdit->setReadOnly(true);
-    ui->xoaButton->setEnabled(true);
+    ui->tenVTEdit->setReadOnly(dangKhoa);   // khóa luôn ô nhập nếu đã dùng
+    ui->dvtEdit->setReadOnly(dangKhoa);     //
+    ui->xoaButton->setEnabled(!dangKhoa);   // trước đây luôn là true
+
     capNhatTrangThaiNut();
+
+    if (dangKhoa) {
+        ui->errorLabel->setText("Vật tư này đã được sử dụng trong hóa đơn — không thể sửa hoặc xóa.");
+        ui->errorLabel->setVisible(true);
+    }
 }
 
 void VatTuPage::onTimKiemChanged() {
@@ -235,10 +251,13 @@ void VatTuPage::resetForm() {
     ui->soLuongEdit->clear();
     ui->maVTEdit->setReadOnly(false);
     ui->soLuongEdit->setReadOnly(false);
+    ui->tenVTEdit->setReadOnly(false);
+    ui->dvtEdit->setReadOnly(false);
     ui->suaButton->setEnabled(false);
     ui->huyButton->setEnabled(false);
     ui->xoaButton->setEnabled(false);
     maVTDangSua.clear();
+    dangKhoa = false;
 
     capNhatTrangThaiNut();
 }

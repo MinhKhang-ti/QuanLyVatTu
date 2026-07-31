@@ -7,7 +7,6 @@
 #include "nhanvienlogic.h"
 #include "vattulogic.h"
 #include "fileio.h"
-
 #include <QStackedWidget>
 #include <QPushButton>
 
@@ -17,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("Quan Ly Nhap Xuat Vat Tu");
     showFullScreen();
+
     khoiTaoDSNV(dsnv);
 
     // Nap du lieu tu file khi khoi dong
@@ -42,17 +42,15 @@ MainWindow::MainWindow(QWidget *parent)
     stack->setCurrentIndex(0);
 
     // Kết nối các sự kiện nút bấm trên sidebar để chuyển trang
-    connect(ui->btnVatTu, &QPushButton::clicked, this, [=]() { 
-        static_cast<VatTuPage*>(vatTuPage)->lamMoiBang();
-        stack->setCurrentIndex(0); 
+    connect(ui->btnVatTu, &QPushButton::clicked, this, [=]() {
+        vatTuPage->lamMoiBang();   // MỚI - lam moi bang truoc khi hien thi,
+        // phong truong hop ton kho vua bi doi boi trang Hoa don
+        stack->setCurrentIndex(0);
     });
-    connect(ui->btnNhanVien, &QPushButton::clicked, this, [=]() { 
-        static_cast<NhanVienPage*>(nhanVienPage)->lamMoiBang();
-        stack->setCurrentIndex(1); 
-    });
-    connect(ui->btnHoaDon, &QPushButton::clicked, this, [=]() { 
-        static_cast<HoaDonPage*>(hoaDonPage)->napDuLieuCombo(); 
-        stack->setCurrentIndex(2); 
+    connect(ui->btnNhanVien, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(1); });
+    connect(ui->btnHoaDon, &QPushButton::clicked, this, [=]() {
+        static_cast<HoaDonPage*>(hoaDonPage)->napDuLieuCombo();
+        stack->setCurrentIndex(2);
     });
     connect(ui->btnThongKe, &QPushButton::clicked, this, [=]() { stack->setCurrentIndex(3); });
     connect(ui->btnThoat, &QPushButton::clicked, this, &MainWindow::close);

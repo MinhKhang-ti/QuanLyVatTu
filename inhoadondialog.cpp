@@ -55,6 +55,10 @@ InHoaDonDialog::InHoaDonDialog(TreeVT& rootRef, DS_NHANVIEN& dsRef, QWidget* par
     tongTienLabel->setFont(f);
     tongTienLabel->setStyleSheet("color: #1976d2;");
 
+    tienChuLabel = new QLabel(this);
+    tienChuLabel->setAlignment(Qt::AlignRight);
+    tienChuLabel->setStyleSheet("color: black; font-size: 16px;");
+
     QHBoxLayout* timLayout = new QHBoxLayout();
     timLayout->addWidget(new QLabel("Số hóa đơn:", this));
     timLayout->addWidget(soHDEdit);
@@ -68,6 +72,7 @@ InHoaDonDialog::InHoaDonDialog(TreeVT& rootRef, DS_NHANVIEN& dsRef, QWidget* par
     mainLayout->addWidget(thongTinLabel);
     mainLayout->addWidget(table);
     mainLayout->addWidget(tongTienLabel);
+    mainLayout->addWidget(tienChuLabel);
 
     connect(timButton, &QPushButton::clicked, this, &InHoaDonDialog::onTimClicked);
     connect(soHDEdit, &QLineEdit::returnPressed, this, &InHoaDonDialog::onTimClicked);
@@ -114,6 +119,7 @@ void InHoaDonDialog::xoaBang() {
     table->setRowCount(0);
     thongTinLabel->clear();
     tongTienLabel->clear();
+    tienChuLabel->clear();
 }
 
 void InHoaDonDialog::onTimClicked() {
@@ -167,4 +173,7 @@ void InHoaDonDialog::hienThiHoaDon(nodeHD* hd, int idxNV) {
 
     double tongTien = tinhTongTriGiaHD(ds);
     tongTienLabel->setText(QString("TỔNG TRỊ GIÁ HÓA ĐƠN: %1 VNĐ").arg(QString::number(tongTien, 'f', 0)));
+
+    QString tienChu = QString::fromStdString(docSoThanhChu(static_cast<long long>(tongTien)));
+    tienChuLabel->setText("(Bằng chữ: " + tienChu + ")");
 }
