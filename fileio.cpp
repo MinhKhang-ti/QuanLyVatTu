@@ -15,7 +15,8 @@ static void luuVatTuHelper(nodeVT* root, ofstream& outFile) {
     outFile << root->vt.MAVT << "|"
             << root->vt.TENVT << "|"
             << root->vt.DVT << "|"
-            << root->vt.SoLuongTon << "\n";
+            << root->vt.SoLuongTon << "|"
+            << (root->vt.DaXuatHienTrongHD ? 1 : 0) << "\n";
     luuVatTuHelper(root->left, outFile);
     luuVatTuHelper(root->right, outFile);
 }
@@ -39,10 +40,9 @@ void luuVatTu(TreeVT root, const string& duongDan) {
 void docVatTu(TreeVT& root, const string& duongDan) {
     ifstream inFile(duongDan);
     if (!inFile.is_open()) return;
-    
-    // Giai phong cay cu neu co du lieu
+
     huyCayVT(root);
-    
+
     string line;
     while (getline(inFile, line)) {
         if (line.empty()) continue;
@@ -55,6 +55,12 @@ void docVatTu(TreeVT& root, const string& duongDan) {
             int slTon = stoi(slTonStr);
             string loi;
             themVT(root, mavt.c_str(), tenvt.c_str(), dvt.c_str(), slTon, loi);
+
+            string daDungStr;
+            if (getline(ss, daDungStr, '|') && daDungStr == "1") {
+                nodeVT* node = timVT(root, mavt.c_str());
+                if (node) node->vt.DaXuatHienTrongHD = true;
+            }
         }
     }
     inFile.close();

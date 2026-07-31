@@ -118,6 +118,7 @@ void capNhatTonKhoKhiGhiHD(TreeVT root, const DS_CTHD& ds, char loaiHD) {
             } else if (loaiHD == 'X') {
                 node->vt.SoLuongTon -= ds.nodes[i].SoLuong;
             }
+            node->vt.DaXuatHienTrongHD = true;
         }
     }
 }

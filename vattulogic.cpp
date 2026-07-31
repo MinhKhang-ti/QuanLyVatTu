@@ -24,7 +24,7 @@ bool themVT(TreeVT& root, const char* mavt, const char* tenvt, const char* dvt,
     while (*p) {
         int cmp = strcmp(mavt, (*p)->vt.MAVT);
         if (cmp == 0) { loi = "Ma vat tu da ton tai"; return false; }
-        p = (cmp < 0) ? &(*p)->left :&(*p)->right;
+        p = (cmp < 0) ? &((*p)->left) :&((*p)->right);
     }
 
     *p = taoNodeVT(mavt, tenvt, dvt, soLuongTon);
@@ -35,41 +35,64 @@ bool suaVT(TreeVT root, const char* mavt, const char* tenvtMoi, const char* dvtM
            std::string& loi) {
     nodeVT* p = timVT(root, mavt);
     if (!p) { loi = "Khong tim thay vat tu"; return false; }
+    if (p->vt.DaXuatHienTrongHD) {
+        loi = "Vat tu da xuat hien trong hoa don da ghi, khong duoc phep sua!";
+        return false;
+    }
     strncpy(p->vt.TENVT, tenvtMoi, 50); p->vt.TENVT[50] = '\0';
     strncpy(p->vt.DVT, dvtMoi, 10); p->vt.DVT[10] = '\0';
     return true;
 }
 
-static void removeMinAndCopy(TreeVT& r, nodeVT* victim) {
-    if (r->left) {
-        removeMinAndCopy(r->left, victim);
-    } else {
-        victim->vt = r->vt;     // Copy dữ liệu
-        nodeVT* t = r;
-        r = r->right;           // Nối lại trực tiếp
-        delete t;
+nodeVT* timNodeNhoNhat(nodeVT* root) {
+    nodeVT* hienTai = root;
+    while (hienTai != nullptr && hienTai->left != nullptr) {
+        hienTai = hienTai->left;
     }
+    return hienTai; // Trả về Node nhỏ nhất tìm được
 }
 
 bool xoaVT(TreeVT& root, const char* mavt, std::string& loi) {
-    if (!root) { loi = "Khong tim thay vat tu"; return false; }
+    if (root == nullptr) {
+        loi = "Khong tim thay vat tu!";
+        return false;
+    }
 
     int cmp = strcmp(mavt, root->vt.MAVT);
-    if (cmp < 0) return xoaVT(root->left, mavt, loi);
-    if (cmp > 0) return xoaVT(root->right, mavt, loi);
-
-    if (!root->right) {                 // 0 con hoặc 1 con trái
-        nodeVT* t = root;
-        root = root->left;
-        delete t;
-    } else if (!root->left) {           // 1 con phải
-        nodeVT* t = root;
-        root = root->right;
-        delete t;
-    } else {                            // 2 con
-        removeMinAndCopy(root->right, root);
+    if (cmp < 0) {
+        return xoaVT(root->left, mavt, loi);
     }
-    return true;
+    else if (cmp > 0) {
+        return xoaVT(root->right, mavt, loi);
+    }
+    else {
+        if (root->vt.DaXuatHienTrongHD) {
+            loi = "Vat tu da xuat hien trong hoa don, khong duoc phep xoa!";
+            return false;
+        }
+
+        // --- TH 1: Node KHÔNG CÓ CON TRÁI  ---
+        if (root->left == nullptr) {
+            nodeVT* nodeCanXoa = root;
+            root = root->right;
+            delete nodeCanXoa;
+        }
+        // --- TH 2: Node KHÔNG CÓ CON PHẢI ---
+        else if (root->right == nullptr) {
+            nodeVT* nodeCanXoa = root;
+            root = root->left;
+            delete nodeCanXoa;
+        }
+        // --- TH 3: Node CÓ ĐỦ 2 CON ---
+        else {
+            nodeVT* nodeTheMang = timNodeNhoNhat(root->right);
+
+            root->vt = nodeTheMang->vt;
+            std::string loiPhu = "";
+            xoaVT(root->right, nodeTheMang->vt.MAVT, loiPhu);
+        }
+        return true;
+    }
 }
 
 int demSoVT(TreeVT root) {

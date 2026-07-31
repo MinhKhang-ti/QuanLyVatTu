@@ -26,7 +26,7 @@ InHoaDonDialog::InHoaDonDialog(TreeVT& rootRef, DS_NHANVIEN& dsRef, QWidget* par
     danhSachTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     danhSachTable->setMaximumHeight(180);
 
-    // ==== Ô nhập nhanh (giữ nguyên tính năng cũ) ====
+    // ==== Ô nhập nhanh ====
     soHDEdit = new QLineEdit(this);
     soHDEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[A-Za-z0-9]{0,20}"), this));
     soHDEdit->setPlaceholderText("Hoặc gõ trực tiếp số hóa đơn...");
@@ -103,7 +103,6 @@ void InHoaDonDialog::napDanhSachHD() {
     }
 }
 
-// MỚI — click vào 1 dòng trong danh sách -> tự điền số HĐ và hiển thị chi tiết
 void InHoaDonDialog::onChonHDTrongDanhSach(int row, int /*column*/) {
     QTableWidgetItem* item = danhSachTable->item(row, 0);
     if (!item) return;
