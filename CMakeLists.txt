@@ -26,6 +26,7 @@ qt_add_executable(QLVT
     data/vattu.txt
     data/nhanvien.txt
     .gitignore
+    inhoadondialog.h inhoadondialog.cpp
 )
 
 target_link_libraries(QLVT
