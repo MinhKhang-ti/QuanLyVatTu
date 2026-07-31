@@ -2,5 +2,6 @@ NV|N23|Nguyễn Duy|Anh|Nam
 HD|HD01|31|7|2026|N
 CT|VT041|20|1e+06|5
 NV|NV03|Pham|Anh|Nam
+NV|NV004|Phạm Đình Gia|Nguyên|Nam
 NV|NV02|Duy Anh|Phước|Nam
 NV|NV01|Minh|Xuyến|Nam

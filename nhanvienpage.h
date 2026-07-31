@@ -24,6 +24,7 @@ private slots:
     void onHuyClicked();
     void onCellDoubleClicked(int row, int column);
     void onTimKiemChanged();
+    void onTableSelectionChanged();
 
 private:
     Ui::NhanVienPage *ui;

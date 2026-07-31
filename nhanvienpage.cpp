@@ -30,6 +30,7 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
     ui->themButton->setEnabled(false);
     ui->suaButton->setEnabled(false);
     ui->huyButton->setEnabled(false);
+    ui->xoaButton->setEnabled(false);
 
     // Kết nối các tín hiệu nhập liệu
     connect(ui->manvEdit, &QLineEdit::textChanged, this, &NhanVienPage::validateForm);
@@ -45,7 +46,8 @@ NhanVienPage::NhanVienPage(DS_NHANVIEN &dsRef, QWidget *parent)
     connect(ui->xoaButton, &QPushButton::clicked, this, &NhanVienPage::onXoaClicked);
     connect(ui->huyButton, &QPushButton::clicked, this, &NhanVienPage::onHuyClicked);
     
-    // Kết nối sự kiện đúp chuột vào bảng để sửa thông tin nhân viên
+    // Kết nối sự kiện chọn dòng và đúp chuột vào bảng
+    connect(ui->table, &QTableWidget::itemSelectionChanged, this, &NhanVienPage::onTableSelectionChanged);
     connect(ui->table, &QTableWidget::cellDoubleClicked, this, &NhanVienPage::onCellDoubleClicked);
 
     lamMoiBang();
@@ -183,6 +185,31 @@ void NhanVienPage::onHuyClicked() {
 
     ui->suaButton->setEnabled(false);
     ui->huyButton->setEnabled(false);
+    ui->xoaButton->setEnabled(false);
+}
+
+void NhanVienPage::onTableSelectionChanged() {
+    int row = ui->table->currentRow();
+    if (row < 0 || ui->table->selectedItems().isEmpty()) {
+        ui->xoaButton->setEnabled(false);
+        return;
+    }
+
+    QTableWidgetItem* itemMa = ui->table->item(row, 0);
+    if (!itemMa) {
+        ui->xoaButton->setEnabled(false);
+        return;
+    }
+
+    QString manv = itemMa->text();
+    int idx = timViTriNV(dsnv, manv.toStdString().c_str());
+    if (idx != -1 && (dsnv.nodes[idx]->dshd != nullptr || dsnv.nodes[idx]->CoHD)) {
+        // Nếu nhân viên đã có hóa đơn -> Vô hiệu hóa nút Xóa (không cho nhấn)
+        ui->xoaButton->setEnabled(false);
+    } else {
+        // Nhân viên chưa có hóa đơn -> Cho phép nhấn nút Xóa
+        ui->xoaButton->setEnabled(true);
+    }
 }
 
 void NhanVienPage::onCellDoubleClicked(int row, int column) {
